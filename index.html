@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Forex Rates</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>💹 Live Forex Rates</h1>
+        
+        <!-- Currency Converter -->
+        <div class="converter-box">
+            <h2>Currency Converter</h2>
+            <div class="converter">
+                <input type="number" id="amount" value="1" min="0">
+                <select id="fromCurrency"></select>
+                <span>➡️</span>
+                <select id="toCurrency"></select>
+                <button onclick="convertCurrency()">Convert</button>
+            </div>
+            <div id="result" class="result"></div>
+        </div>
+
+        <!-- Live Rates Table -->
+        <div class="rates-box">
+            <h2>📊 Live Exchange Rates (Base: USD)</h2>
+            <p id="lastUpdate"></p>
+            <div id="loading">Loading rates...</div>
+            <table id="ratesTable">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Rate</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody id="ratesBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Major Pairs -->
+        <div class="pairs-box">
+            <h2>🔥 Major Forex Pairs</h2>
+            <div id="majorPairs" class="pairs-grid"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
