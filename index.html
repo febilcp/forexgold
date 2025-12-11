@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Live Chart & AI Signal</title>
+    <title>XAU/USD Live Chart & Signal</title>
     <style>
         * {
             margin: 0;
@@ -69,7 +69,7 @@
         /* Main Layout */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 400px;
             gap: 20px;
             height: calc(100vh - 120px);
         }
@@ -89,16 +89,22 @@
 
         /* Signal Section */
         .signal-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Signal Box */
+        .signal-box {
             background: #1a1a2e;
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255, 215, 0, 0.1);
-            display: flex;
-            flex-direction: column;
+            flex: 1;
         }
 
         .signal-header {
-            padding: 15px;
+            padding: 12px 15px;
             background: rgba(255, 215, 0, 0.05);
             text-align: center;
             border-bottom: 1px solid rgba(255, 215, 0, 0.1);
@@ -106,259 +112,137 @@
 
         .signal-header h2 {
             color: #ffd700;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .signal-widget {
-            flex: 1;
-            overflow: hidden;
-            min-height: 300px;
+            height: calc(100% - 45px);
         }
 
-        /* AI Section */
-        .ai-section {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 215, 0, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .ai-button {
-            width: 100%;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .ai-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .ai-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Loading */
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* AI Result */
-        .ai-result {
-            margin-top: 15px;
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(145deg, #1a1a2e, #252538);
+            border-radius: 15px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.1);
         }
 
-        .ai-result.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
+        .info-title {
+            color: #ffd700;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .info-content {
+            color: #aaa;
+            font-size: 0.85rem;
+            line-height: 1.6;
         }
 
-        .ai-result-header {
+        .info-content strong {
+            color: #fff;
+        }
+
+        .signal-guide {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .guide-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .ai-result-header h3 {
-            color: #667eea;
-            font-size: 1rem;
-        }
-
-        .ai-signal {
-            text-align: center;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .ai-signal.buy {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.1));
-            border: 1px solid rgba(0, 255, 136, 0.5);
-        }
-
-        .ai-signal.sell {
-            background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(200, 50, 60, 0.1));
-            border: 1px solid rgba(255, 71, 87, 0.5);
-        }
-
-        .ai-signal.wait {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(200, 170, 0, 0.1));
-            border: 1px solid rgba(255, 215, 0, 0.5);
-        }
-
-        .ai-signal-text {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-
-        .ai-signal.buy .ai-signal-text { color: #00ff88; }
-        .ai-signal.sell .ai-signal-text { color: #ff4757; }
-        .ai-signal.wait .ai-signal-text { color: #ffd700; }
-
-        .ai-confidence {
-            font-size: 0.9rem;
-            color: #888;
-            margin-top: 5px;
-        }
-
-        .ai-analysis {
-            font-size: 0.9rem;
-            color: #ccc;
-            line-height: 1.6;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .ai-analysis::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .ai-analysis::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
-        }
-
-        .ai-analysis::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-        }
-
-        .ai-timestamp {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 15px;
-            text-align: right;
-        }
-
-        /* API Setup */
-        .api-setup {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255, 215, 0, 0.05);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            display: none;
-        }
-
-        .api-setup.show {
-            display: block;
-        }
-
-        .api-setup label {
-            display: block;
-            color: #ffd700;
+            margin-bottom: 10px;
             font-size: 0.85rem;
-            margin-bottom: 8px;
         }
 
-        .api-setup input {
-            width: 100%;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.3);
+        .guide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .guide-dot.buy { background: #00ff88; }
+        .guide-dot.sell { background: #ff4757; }
+        .guide-dot.neutral { background: #ffd700; }
+
+        .guide-text {
+            color: #ccc;
+        }
+
+        /* Timeframe Selector */
+        .timeframe-box {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .timeframe-title {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timeframe-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tf-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            color: #fff;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        .api-setup input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .api-setup .api-note {
-            font-size: 0.75rem;
             color: #888;
-            line-height: 1.5;
-        }
-
-        .api-setup .api-note a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        .api-save-btn {
-            width: 100%;
-            padding: 10px;
-            background: #667eea;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.2s;
         }
 
-        .api-save-btn:hover {
-            background: #5a6fd6;
+        .tf-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
         }
 
-        /* Error Message */
-        .error-msg {
+        .tf-btn.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
             background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.8rem;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 0.75rem;
             color: #ff6b7a;
-            display: none;
-        }
-
-        .error-msg.show {
-            display: block;
+            text-align: center;
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .main-grid {
                 grid-template-columns: 1fr;
                 height: auto;
             }
 
             .chart-section {
+                height: 500px;
+            }
+
+            .signal-box {
                 height: 450px;
-            }
-
-            .signal-section {
-                height: auto;
-            }
-
-            .signal-widget {
-                min-height: 350px;
             }
         }
     </style>
@@ -369,7 +253,7 @@
 
         <!-- Header -->
         <header class="header">
-            <h1>🥇 XAU/USD</h1>
+            <h1>🥇 XAU/USD Gold</h1>
             <div class="live-badge">
                 <span class="live-dot"></span>
                 <span class="live-text">LIVE</span>
@@ -401,7 +285,8 @@
                             "allow_symbol_change": false,
                             "save_image": false,
                             "container_id": "tradingview_chart",
-                            "hide_volume": false
+                            "hide_volume": false,
+                            "studies": ["STD;RSI", "STD;MACD"]
                         });
                         </script>
                     </div>
@@ -410,64 +295,80 @@
 
             <!-- Signal Section -->
             <div class="signal-section">
-                <div class="signal-header">
-                    <h2>📊 Technical Signal</h2>
-                </div>
-                
-                <div class="signal-widget">
-                    <div class="tradingview-widget-container" style="height:100%;">
-                        <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                        {
-                            "interval": "15m",
-                            "width": "100%",
-                            "isTransparent": true,
-                            "height": "100%",
-                            "symbol": "OANDA:XAUUSD",
-                            "showIntervalTabs": true,
-                            "locale": "en",
-                            "colorTheme": "dark"
-                        }
-                        </script>
+
+                <!-- Timeframe Selector -->
+                <div class="timeframe-box">
+                    <div class="timeframe-title">Select Timeframe</div>
+                    <div class="timeframe-buttons">
+                        <button class="tf-btn" onclick="changeTimeframe('1m')">1m</button>
+                        <button class="tf-btn" onclick="changeTimeframe('5m')">5m</button>
+                        <button class="tf-btn active" onclick="changeTimeframe('15m')">15m</button>
+                        <button class="tf-btn" onclick="changeTimeframe('1h')">1H</button>
+                        <button class="tf-btn" onclick="changeTimeframe('4h')">4H</button>
+                        <button class="tf-btn" onclick="changeTimeframe('1D')">1D</button>
                     </div>
                 </div>
 
-                <!-- AI Analysis Section -->
-                <div class="ai-section">
-                    <button class="ai-button" id="aiAnalyzeBtn" onclick="analyzeWithAI()">
-                        <span class="icon">🤖</span>
-                        <span class="btn-text">AI Analysis</span>
-                    </button>
-
-                    <!-- API Key Setup -->
-                    <div class="api-setup" id="apiSetup">
-                        <label>🔑 Enter OpenRouter API Key (FREE)</label>
-                        <input type="password" id="apiKeyInput" placeholder="sk-or-v1-xxxxxxxx">
-                        <p class="api-note">
-                            Get FREE API key:<br>
-                            1. Go to <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a><br>
-                            2. Sign up with Google<br>
-                            3. Click "Create Key"<br>
-                            4. Copy & paste here
-                        </p>
-                        <button class="api-save-btn" onclick="saveApiKey()">Save & Analyze</button>
-                        <div class="error-msg" id="errorMsg"></div>
+                <!-- Main Signal Widget -->
+                <div class="signal-box">
+                    <div class="signal-header">
+                        <h2>📊 Buy/Sell Signal</h2>
                     </div>
-
-                    <!-- AI Result -->
-                    <div class="ai-result" id="aiResult">
-                        <div class="ai-result-header">
-                            <span style="font-size: 1.5rem;">🤖</span>
-                            <h3>AI Analysis</h3>
+                    <div class="signal-widget" id="signalWidget">
+                        <!-- TradingView Technical Analysis Widget -->
+                        <div class="tradingview-widget-container" style="height:100%;">
+                            <div class="tradingview-widget-container__widget" style="height:100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                            {
+                                "interval": "15m",
+                                "width": "100%",
+                                "isTransparent": true,
+                                "height": "100%",
+                                "symbol": "OANDA:XAUUSD",
+                                "showIntervalTabs": false,
+                                "locale": "en",
+                                "colorTheme": "dark"
+                            }
+                            </script>
                         </div>
-                        <div class="ai-signal" id="aiSignalBox">
-                            <div class="ai-signal-text" id="aiSignalText">--</div>
-                            <div class="ai-confidence" id="aiConfidence">--</div>
-                        </div>
-                        <div class="ai-analysis" id="aiAnalysisText"></div>
-                        <div class="ai-timestamp" id="aiTimestamp"></div>
                     </div>
                 </div>
+
+                <!-- How to Use -->
+                <div class="info-box">
+                    <div class="info-title">📖 How to Read Signal</div>
+                    <div class="info-content">
+                        This signal is calculated from <strong>26 technical indicators</strong> including RSI, MACD, Moving Averages, Stochastic, ADX, CCI, and more.
+                    </div>
+                    <div class="signal-guide">
+                        <div class="guide-item">
+                            <div class="guide-dot buy"></div>
+                            <span class="guide-text"><strong>STRONG BUY</strong> - Most indicators bullish</span>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-dot buy" style="opacity: 0.6;"></div>
+                            <span class="guide-text"><strong>BUY</strong> - More buy than sell signals</span>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-dot neutral"></div>
+                            <span class="guide-text"><strong>NEUTRAL</strong> - Wait, don't trade</span>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-dot sell" style="opacity: 0.6;"></div>
+                            <span class="guide-text"><strong>SELL</strong> - More sell than buy signals</span>
+                        </div>
+                        <div class="guide-item">
+                            <div class="guide-dot sell"></div>
+                            <span class="guide-text"><strong>STRONG SELL</strong> - Most indicators bearish</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="disclaimer">
+                    ⚠️ Trading involves risk. This is for educational purposes only. Always use stop loss.
+                </div>
+
             </div>
 
         </div>
@@ -475,209 +376,48 @@
     </div>
 
     <script>
-        // ============================================
-        // OPENROUTER API - FREE MODELS
-        // ============================================
-        
-        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        
-        // Free models to try (in order of preference)
-        const FREE_MODELS = [
-            'google/gemma-2-9b-it:free',
-            'meta-llama/llama-3.2-3b-instruct:free',
-            'qwen/qwen-2-7b-instruct:free',
-            'mistralai/mistral-7b-instruct:free',
-            'huggingfaceh4/zephyr-7b-beta:free'
-        ];
-
-        let currentModelIndex = 0;
-
-        function getApiKey() {
-            return localStorage.getItem('openrouter_api_key') || '';
-        }
-
-        function saveApiKey() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (key && key.length > 10) {
-                localStorage.setItem('openrouter_api_key', key);
-                document.getElementById('apiSetup').classList.remove('show');
-                document.getElementById('errorMsg').classList.remove('show');
-                currentModelIndex = 0; // Reset model index
-                analyzeWithAI();
-            } else {
-                showError('Please enter a valid API key');
-            }
-        }
-
-        function showError(msg) {
-            const errorEl = document.getElementById('errorMsg');
-            errorEl.textContent = msg;
-            errorEl.classList.add('show');
-        }
-
-        async function analyzeWithAI() {
-            const apiKey = getApiKey();
-            
-            if (!apiKey) {
-                document.getElementById('apiSetup').classList.add('show');
-                return;
-            }
-
-            const button = document.getElementById('aiAnalyzeBtn');
-            const resultBox = document.getElementById('aiResult');
-            
-            // Loading state
-            button.disabled = true;
-            button.innerHTML = '<div class="loading-spinner"></div><span class="btn-text">Analyzing...</span>';
-            resultBox.classList.remove('show');
-
-            // Try each model until one works
-            let success = false;
-            let lastError = '';
-
-            for (let i = 0; i < FREE_MODELS.length && !success; i++) {
-                try {
-                    const model = FREE_MODELS[i];
-                    console.log('Trying model:', model);
-                    
-                    const result = await tryModel(apiKey, model);
-                    if (result) {
-                        displayResult(result);
-                        success = true;
-                    }
-                } catch (error) {
-                    console.log('Model failed:', error.message);
-                    lastError = error.message;
-                    continue;
-                }
-            }
-
-            if (!success) {
-                // All models failed - show error
-                document.getElementById('apiSetup').classList.add('show');
-                showError('All models failed. Error: ' + lastError);
-                
-                if (lastError.includes('401') || lastError.includes('auth') || lastError.includes('key')) {
-                    localStorage.removeItem('openrouter_api_key');
-                    showError('Invalid API key. Please get a new one.');
-                }
-            }
-
-            // Reset button
-            button.disabled = false;
-            button.innerHTML = '<span class="icon">🤖</span><span class="btn-text">AI Analysis</span>';
-        }
-
-        async function tryModel(apiKey, model) {
-            // Get current time info
-            const now = new Date();
-            const hour = now.getUTCHours();
-            const day = now.getUTCDay();
-            
-            let session = 'Asian Session';
-            if (hour >= 8 && hour < 13) session = 'London Session';
-            else if (hour >= 13 && hour < 21) session = 'New York Session';
-            else if (hour >= 21) session = 'Late US Session';
-
-            const isWeekend = (day === 0 || day === 6);
-
-            const prompt = `You are a gold XAU/USD trading analyst. Current time: ${now.toUTCString()}. Session: ${session}. Market: ${isWeekend ? 'CLOSED' : 'OPEN'}.
-
-Give a trading signal in this exact format:
-
-SIGNAL: BUY or SELL or WAIT
-CONFIDENCE: [number]%
-
-REASON:
-- [reason 1]
-- [reason 2]
-
-ENTRY: $[price]
-STOP LOSS: $[price]
-TAKE PROFIT: $[price]
-
-Be brief and specific.`;
-
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.href,
-                    'X-Title': 'Gold Analysis'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: [{ role: 'user', content: prompt }],
-                    max_tokens: 250,
-                    temperature: 0.3
-                })
+        // Timeframe change function
+        function changeTimeframe(tf) {
+            // Update active button
+            document.querySelectorAll('.tf-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
+            event.target.classList.add('active');
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'API Error');
-            }
-
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                return data.choices[0].message.content;
-            }
-
-            throw new Error('Invalid response format');
-        }
-
-        function displayResult(analysis) {
-            const resultBox = document.getElementById('aiResult');
-            const signalBox = document.getElementById('aiSignalBox');
-            const signalText = document.getElementById('aiSignalText');
-            const confidenceText = document.getElementById('aiConfidence');
-            const analysisText = document.getElementById('aiAnalysisText');
-            const timestampText = document.getElementById('aiTimestamp');
-
-            // Parse signal
-            let signal = 'WAIT';
-            let confidence = '50';
-
-            const signalMatch = analysis.match(/SIGNAL:\s*(BUY|SELL|WAIT)/i);
-            const confidenceMatch = analysis.match(/CONFIDENCE:\s*(\d+)/i);
-
-            if (signalMatch) signal = signalMatch[1].toUpperCase();
-            if (confidenceMatch) confidence = confidenceMatch[1];
-
-            // Update UI
-            signalBox.className = 'ai-signal ' + signal.toLowerCase();
+            // Reload the widget with new timeframe
+            const widgetContainer = document.getElementById('signalWidget');
             
-            if (signal === 'BUY') {
-                signalText.textContent = '📈 BUY';
-            } else if (signal === 'SELL') {
-                signalText.textContent = '📉 SELL';
-            } else {
-                signalText.textContent = '⏸️ WAIT';
+            // Create new widget HTML
+            const widgetHTML = `
+                <div class="tradingview-widget-container" style="height:100%;">
+                    <div class="tradingview-widget-container__widget" style="height:100%;"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                    {
+                        "interval": "${tf}",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "OANDA:XAUUSD",
+                        "showIntervalTabs": false,
+                        "locale": "en",
+                        "colorTheme": "dark"
+                    }
+                    <\/script>
+                </div>
+            `;
+            
+            widgetContainer.innerHTML = widgetHTML;
+            
+            // Re-execute the script
+            const scripts = widgetContainer.getElementsByTagName('script');
+            for (let script of scripts) {
+                const newScript = document.createElement('script');
+                newScript.type = 'text/javascript';
+                newScript.src = script.src;
+                newScript.async = true;
+                newScript.innerHTML = script.innerHTML;
+                script.parentNode.replaceChild(newScript, script);
             }
-
-            confidenceText.textContent = `Confidence: ${confidence}%`;
-
-            // Format analysis
-            let formatted = analysis
-                .replace(/SIGNAL:.*\n?/gi, '')
-                .replace(/CONFIDENCE:.*\n?/gi, '')
-                .replace(/\n/g, '<br>')
-                .replace(/REASON:/gi, '<strong>📝 Reason:</strong>')
-                .replace(/ENTRY:/gi, '<br><strong>🎯 Entry:</strong>')
-                .replace(/STOP LOSS:/gi, '<br><strong>🛑 Stop Loss:</strong>')
-                .replace(/TAKE PROFIT:/gi, '<br><strong>💰 Take Profit:</strong>')
-                .replace(/- /g, '• ');
-
-            analysisText.innerHTML = formatted;
-            timestampText.textContent = `Analyzed: ${new Date().toLocaleTimeString()}`;
-
-            resultBox.classList.add('show');
         }
     </script>
 
