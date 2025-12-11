@@ -444,9 +444,11 @@
                         <label>🔑 Enter OpenRouter API Key (FREE)</label>
                         <input type="password" id="apiKeyInput" placeholder="sk-or-v1-xxxxxxxx">
                         <p class="api-note">
-                            Get FREE API key from: 
-                            <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a><br>
-                            (Sign up → Create Key → Paste here)
+                            Get FREE API key:<br>
+                            1. Go to <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a><br>
+                            2. Sign up with Google<br>
+                            3. Click "Create Key"<br>
+                            4. Copy & paste here
                         </p>
                         <button class="api-save-btn" onclick="saveApiKey()">Save & Analyze</button>
                         <div class="error-msg" id="errorMsg"></div>
@@ -474,11 +476,21 @@
 
     <script>
         // ============================================
-        // USING OPENROUTER API (SUPPORTS CORS!)
-        // Free: https://openrouter.ai/keys
+        // OPENROUTER API - FREE MODELS
         // ============================================
         
         const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        
+        // Free models to try (in order of preference)
+        const FREE_MODELS = [
+            'google/gemma-2-9b-it:free',
+            'meta-llama/llama-3.2-3b-instruct:free',
+            'qwen/qwen-2-7b-instruct:free',
+            'mistralai/mistral-7b-instruct:free',
+            'huggingfaceh4/zephyr-7b-beta:free'
+        ];
+
+        let currentModelIndex = 0;
 
         function getApiKey() {
             return localStorage.getItem('openrouter_api_key') || '';
@@ -490,6 +502,7 @@
                 localStorage.setItem('openrouter_api_key', key);
                 document.getElementById('apiSetup').classList.remove('show');
                 document.getElementById('errorMsg').classList.remove('show');
+                currentModelIndex = 0; // Reset model index
                 analyzeWithAI();
             } else {
                 showError('Please enter a valid API key');
@@ -518,83 +531,105 @@
             button.innerHTML = '<div class="loading-spinner"></div><span class="btn-text">Analyzing...</span>';
             resultBox.classList.remove('show');
 
-            try {
-                // Get current time info
-                const now = new Date();
-                const hour = now.getUTCHours();
-                let session = 'Asian Session';
-                if (hour >= 8 && hour < 13) session = 'London Session';
-                else if (hour >= 13 && hour < 21) session = 'New York Session';
-                else if (hour >= 21) session = 'Late US Session';
+            // Try each model until one works
+            let success = false;
+            let lastError = '';
 
-                const prompt = `You are a gold (XAU/USD) trading expert. Analyze current conditions:
+            for (let i = 0; i < FREE_MODELS.length && !success; i++) {
+                try {
+                    const model = FREE_MODELS[i];
+                    console.log('Trying model:', model);
+                    
+                    const result = await tryModel(apiKey, model);
+                    if (result) {
+                        displayResult(result);
+                        success = true;
+                    }
+                } catch (error) {
+                    console.log('Model failed:', error.message);
+                    lastError = error.message;
+                    continue;
+                }
+            }
 
-Time: ${now.toUTCString()}
-Session: ${session}
+            if (!success) {
+                // All models failed - show error
+                document.getElementById('apiSetup').classList.add('show');
+                showError('All models failed. Error: ' + lastError);
+                
+                if (lastError.includes('401') || lastError.includes('auth') || lastError.includes('key')) {
+                    localStorage.removeItem('openrouter_api_key');
+                    showError('Invalid API key. Please get a new one.');
+                }
+            }
 
-Provide trading recommendation in this EXACT format:
+            // Reset button
+            button.disabled = false;
+            button.innerHTML = '<span class="icon">🤖</span><span class="btn-text">AI Analysis</span>';
+        }
 
-SIGNAL: [BUY or SELL or WAIT]
+        async function tryModel(apiKey, model) {
+            // Get current time info
+            const now = new Date();
+            const hour = now.getUTCHours();
+            const day = now.getUTCDay();
+            
+            let session = 'Asian Session';
+            if (hour >= 8 && hour < 13) session = 'London Session';
+            else if (hour >= 13 && hour < 21) session = 'New York Session';
+            else if (hour >= 21) session = 'Late US Session';
+
+            const isWeekend = (day === 0 || day === 6);
+
+            const prompt = `You are a gold XAU/USD trading analyst. Current time: ${now.toUTCString()}. Session: ${session}. Market: ${isWeekend ? 'CLOSED' : 'OPEN'}.
+
+Give a trading signal in this exact format:
+
+SIGNAL: BUY or SELL or WAIT
 CONFIDENCE: [number]%
 
 REASON:
-[2-3 short bullet points why]
+- [reason 1]
+- [reason 2]
 
-ENTRY: [if BUY/SELL, suggest price zone]
-STOP LOSS: [suggest level]
-TAKE PROFIT: [suggest level]
+ENTRY: $[price]
+STOP LOSS: $[price]
+TAKE PROFIT: $[price]
 
-Be specific and actionable.`;
+Be brief and specific.`;
 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.href,
-                        'X-Title': 'XAU/USD Analysis'
-                    },
-                    body: JSON.stringify({
-                        model: 'meta-llama/llama-3.1-8b-instruct:free',
-                        messages: [
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ],
-                        max_tokens: 300,
-                        temperature: 0.3
-                    })
-                });
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'Gold Analysis'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 250,
+                    temperature: 0.3
+                })
+            });
 
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message || 'API Error');
-                }
-
-                if (data.choices && data.choices[0]) {
-                    const analysis = data.choices[0].message.content;
-                    displayResult(analysis);
-                } else {
-                    throw new Error('Invalid response');
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                
-                // Show error in UI
-                document.getElementById('apiSetup').classList.add('show');
-                showError('Error: ' + error.message);
-                
-                // If auth error, clear key
-                if (error.message.includes('401') || error.message.includes('auth')) {
-                    localStorage.removeItem('openrouter_api_key');
-                }
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<span class="icon">🤖</span><span class="btn-text">AI Analysis</span>';
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
             }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message || 'API Error');
+            }
+
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                return data.choices[0].message.content;
+            }
+
+            throw new Error('Invalid response format');
         }
 
         function displayResult(analysis) {
@@ -628,15 +663,16 @@ Be specific and actionable.`;
 
             confidenceText.textContent = `Confidence: ${confidence}%`;
 
-            // Format analysis text
+            // Format analysis
             let formatted = analysis
-                .replace(/SIGNAL:.*\n?/i, '')
-                .replace(/CONFIDENCE:.*\n?/i, '')
+                .replace(/SIGNAL:.*\n?/gi, '')
+                .replace(/CONFIDENCE:.*\n?/gi, '')
                 .replace(/\n/g, '<br>')
                 .replace(/REASON:/gi, '<strong>📝 Reason:</strong>')
                 .replace(/ENTRY:/gi, '<br><strong>🎯 Entry:</strong>')
                 .replace(/STOP LOSS:/gi, '<br><strong>🛑 Stop Loss:</strong>')
-                .replace(/TAKE PROFIT:/gi, '<br><strong>💰 Take Profit:</strong>');
+                .replace(/TAKE PROFIT:/gi, '<br><strong>💰 Take Profit:</strong>')
+                .replace(/- /g, '• ');
 
             analysisText.innerHTML = formatted;
             timestampText.textContent = `Analyzed: ${new Date().toLocaleTimeString()}`;
