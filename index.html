@@ -41,6 +41,18 @@
             color: #ffd700;
         }
 
+        .price-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-price {
+            font-size: 1.4rem;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
         .live-badge {
             display: flex;
             align-items: center;
@@ -217,6 +229,12 @@
             font-size: 0.85rem;
         }
 
+        .ai-current-price {
+            color: #ffd700;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
         /* Trade Levels */
         .trade-levels {
             display: grid;
@@ -260,6 +278,12 @@
         .level-box.entry .level-value { color: #a78bfa; }
         .level-box.sl .level-value { color: #ff4757; }
         .level-box.tp .level-value { color: #00ff88; }
+
+        .level-pips {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 3px;
+        }
 
         /* AI Reason */
         .ai-reason {
@@ -404,6 +428,11 @@
             .chart-section {
                 min-height: 450px;
             }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -414,9 +443,12 @@
         <!-- Header -->
         <header class="header">
             <h1>🥇 XAU/USD Gold</h1>
-            <div class="live-badge">
-                <span class="live-dot"></span>
-                <span class="live-text">LIVE</span>
+            <div class="price-display">
+                <div class="current-price" id="headerPrice">Loading...</div>
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    <span class="live-text">LIVE</span>
+                </div>
             </div>
         </header>
 
@@ -499,6 +531,7 @@
                         <div id="aiResult" style="display: none;">
                             <div class="ai-signal-display">
                                 <div class="ai-symbol">XAUUSD</div>
+                                <div class="ai-current-price" id="aiCurrentPrice">--</div>
                                 <div class="ai-bias" id="aiBias">--</div>
                             </div>
 
@@ -506,14 +539,17 @@
                                 <div class="level-box entry">
                                     <div class="level-label">Entry</div>
                                     <div class="level-value" id="aiEntry">--</div>
+                                    <div class="level-pips" id="entryPips">--</div>
                                 </div>
                                 <div class="level-box sl">
                                     <div class="level-label">Stop Loss</div>
                                     <div class="level-value" id="aiSL">--</div>
+                                    <div class="level-pips" id="slPips">--</div>
                                 </div>
                                 <div class="level-box tp">
                                     <div class="level-label">Take Profit</div>
                                     <div class="level-value" id="aiTP">--</div>
+                                    <div class="level-pips" id="tpPips">--</div>
                                 </div>
                             </div>
 
@@ -524,7 +560,7 @@
 
                             <div class="ai-timestamp">
                                 <span id="aiTime">--</span>
-                                <div class="cache-note">Signal cached for 5 minutes to prevent repainting</div>
+                                <div class="cache-note">Signal cached for 5 minutes</div>
                             </div>
                         </div>
                     </div>
@@ -554,7 +590,7 @@
         // ============================================
         
         const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
         
         const FREE_MODELS = [
             'google/gemma-2-9b-it:free',
@@ -562,6 +598,69 @@
             'qwen/qwen-2-7b-instruct:free',
             'mistralai/mistral-7b-instruct:free'
         ];
+
+        // Current gold price (will be fetched)
+        let currentGoldPrice = null;
+
+        // ============================================
+        // FETCH REAL GOLD PRICE
+        // ============================================
+        
+        async function fetchRealGoldPrice() {
+            const sources = [
+                fetchFromMetalsLive,
+                fetchFromGoldAPI,
+                fetchFromForexAPI
+            ];
+
+            for (const source of sources) {
+                try {
+                    const price = await source();
+                    if (price && price > 1000) {
+                        currentGoldPrice = price;
+                        updateHeaderPrice(price);
+                        return price;
+                    }
+                } catch (e) {
+                    console.log('Price source failed:', e.message);
+                    continue;
+                }
+            }
+
+            // Fallback - prompt user for price
+            return null;
+        }
+
+        async function fetchFromMetalsLive() {
+            const response = await fetch('https://api.metals.live/v1/spot/gold');
+            const data = await response.json();
+            if (data && data[0] && data[0].price) {
+                return data[0].price;
+            }
+            throw new Error('No price data');
+        }
+
+        async function fetchFromGoldAPI() {
+            const response = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+            const data = await response.json();
+            if (data && data.items && data.items[0]) {
+                return data.items[0].xauPrice;
+            }
+            throw new Error('No price data');
+        }
+
+        async function fetchFromForexAPI() {
+            const response = await fetch('https://api.exchangerate.host/latest?base=XAU&symbols=USD');
+            const data = await response.json();
+            if (data && data.rates && data.rates.USD) {
+                return data.rates.USD;
+            }
+            throw new Error('No price data');
+        }
+
+        function updateHeaderPrice(price) {
+            document.getElementById('headerPrice').textContent = '$' + price.toFixed(2);
+        }
 
         // ============================================
         // API KEY MANAGEMENT
@@ -590,18 +689,17 @@
         }
 
         // ============================================
-        // CACHE MANAGEMENT - PREVENTS REPAINTING
+        // CACHE MANAGEMENT
         // ============================================
         
         function getCachedAnalysis() {
-            const cached = localStorage.getItem('xauusd_analysis');
+            const cached = localStorage.getItem('xauusd_analysis_v2');
             if (!cached) return null;
             
             try {
                 const data = JSON.parse(cached);
                 const now = Date.now();
                 
-                // Check if cache is still valid (5 minutes)
                 if (now - data.timestamp < CACHE_DURATION) {
                     return data;
                 }
@@ -617,11 +715,11 @@
                 ...analysis,
                 timestamp: Date.now()
             };
-            localStorage.setItem('xauusd_analysis', JSON.stringify(data));
+            localStorage.setItem('xauusd_analysis_v2', JSON.stringify(data));
         }
 
         function getCacheTimeRemaining() {
-            const cached = localStorage.getItem('xauusd_analysis');
+            const cached = localStorage.getItem('xauusd_analysis_v2');
             if (!cached) return 0;
             
             try {
@@ -657,6 +755,28 @@
             
             // Loading state
             button.disabled = true;
+            button.innerHTML = '<div class="loading-spinner"></div><span>Fetching price...</span>';
+
+            // Fetch real gold price first
+            let price = currentGoldPrice;
+            if (!price) {
+                price = await fetchRealGoldPrice();
+            }
+
+            // If still no price, ask user
+            if (!price) {
+                price = prompt('Could not fetch gold price automatically.\nPlease enter current XAU/USD price (e.g., 3250):');
+                price = parseFloat(price);
+                if (!price || isNaN(price)) {
+                    button.disabled = false;
+                    button.innerHTML = '<span>Analyze</span>';
+                    showError('Invalid price entered');
+                    return;
+                }
+                currentGoldPrice = price;
+                updateHeaderPrice(price);
+            }
+
             button.innerHTML = '<div class="loading-spinner"></div><span>Analyzing...</span>';
 
             // Try each model
@@ -668,9 +788,8 @@
                     const model = FREE_MODELS[i];
                     console.log('Trying model:', model);
                     
-                    const result = await callAI(apiKey, model);
+                    const result = await callAI(apiKey, model, price);
                     if (result) {
-                        // Cache the result
                         setCachedAnalysis(result);
                         displayResult(result);
                         success = true;
@@ -694,43 +813,45 @@
             // Reset button
             button.disabled = false;
             button.innerHTML = '<span>Analyze</span>';
+            updateButtonState();
         }
 
         // ============================================
         // AI API CALL
         // ============================================
         
-        async function callAI(apiKey, model) {
+        async function callAI(apiKey, model, realPrice) {
             const now = new Date();
             const hour = now.getUTCHours();
             const day = now.getUTCDay();
             
             // Determine session
-            let session = 'Asian Session (Low Volatility)';
-            if (hour >= 7 && hour < 12) session = 'London Session (High Volatility)';
-            else if (hour >= 12 && hour < 17) session = 'London-NY Overlap (Highest Volatility)';
-            else if (hour >= 17 && hour < 21) session = 'New York Session (Medium Volatility)';
+            let session = 'Asian Session';
+            if (hour >= 7 && hour < 12) session = 'London Session';
+            else if (hour >= 12 && hour < 17) session = 'London-NY Overlap';
+            else if (hour >= 17 && hour < 21) session = 'New York Session';
             
             const isWeekend = (day === 0 || day === 6);
 
-            const prompt = `You are a professional gold (XAU/USD) technical analyst. Provide a detailed trading analysis.
+            const prompt = `You are a professional gold (XAU/USD) technical analyst.
 
-Current Time: ${now.toUTCString()}
+CURRENT REAL PRICE: $${realPrice.toFixed(2)}
+Time: ${now.toUTCString()}
 Session: ${session}
-Market Status: ${isWeekend ? 'CLOSED - Weekend' : 'OPEN'}
+Market: ${isWeekend ? 'CLOSED' : 'OPEN'}
 
-Analyze XAU/USD and provide your response in EXACTLY this format (no other text):
+Based on the CURRENT PRICE of $${realPrice.toFixed(2)}, provide your analysis in EXACTLY this format:
 
 BIAS: [Strong Buy / Buy / Neutral Buy / Neutral / Neutral Sell / Sell / Strong Sell]
-ENTRY: [price number only, e.g., 3245]
-STOP_LOSS: [price number only, e.g., 3220]
-TAKE_PROFIT: [price number only, e.g., 3280]
-REASON: [Your detailed technical analysis in 2-3 sentences. Include timeframe analysis (15m, 30m, 1H), Bollinger Bands position, RSI, MACD, support/resistance levels, price action patterns. Be specific about price levels.]
+ENTRY: [must be close to ${realPrice.toFixed(0)}, within +/- 10]
+STOP_LOSS: [15-30 points below entry for buy, or above for sell]
+TAKE_PROFIT: [30-60 points in profit direction]
+REASON: [2-3 sentences about 15m/30m/1H timeframes, Bollinger Bands, RSI, support/resistance. Be specific.]
 
-Important: 
-- Use realistic current gold prices (around $3200-3400 range)
-- Entry, SL, TP must be specific numbers
-- REASON must be detailed technical analysis`;
+IMPORTANT: 
+- Current price is $${realPrice.toFixed(2)} - use this EXACT price range
+- Entry must be between ${(realPrice - 10).toFixed(0)} and ${(realPrice + 10).toFixed(0)}
+- All prices must be realistic for current gold value`;
 
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -744,7 +865,7 @@ Important:
                     model: model,
                     messages: [{ role: 'user', content: prompt }],
                     max_tokens: 400,
-                    temperature: 0.2  // Low temperature for more consistent output
+                    temperature: 0.2
                 })
             });
 
@@ -761,7 +882,7 @@ Important:
 
             if (data.choices && data.choices[0] && data.choices[0].message) {
                 const content = data.choices[0].message.content;
-                return parseAnalysis(content);
+                return parseAnalysis(content, realPrice);
             }
 
             throw new Error('Invalid response');
@@ -771,7 +892,7 @@ Important:
         // PARSE AI RESPONSE
         // ============================================
         
-        function parseAnalysis(content) {
+        function parseAnalysis(content, realPrice) {
             console.log('AI Response:', content);
             
             // Parse each field
@@ -781,18 +902,35 @@ Important:
             const tpMatch = content.match(/TAKE_PROFIT:\s*\$?(\d+\.?\d*)/i);
             const reasonMatch = content.match(/REASON:\s*(.+)/is);
 
-            const bias = biasMatch ? biasMatch[1].trim() : 'Neutral';
-            const entry = entryMatch ? parseFloat(entryMatch[1]) : 3250;
-            const sl = slMatch ? parseFloat(slMatch[1]) : entry - 25;
-            const tp = tpMatch ? parseFloat(tpMatch[1]) : entry + 40;
-            const reason = reasonMatch ? reasonMatch[1].trim() : 'Technical analysis based on current market conditions.';
+            let bias = biasMatch ? biasMatch[1].trim() : 'Neutral';
+            let entry = entryMatch ? parseFloat(entryMatch[1]) : realPrice;
+            let sl = slMatch ? parseFloat(slMatch[1]) : 0;
+            let tp = tpMatch ? parseFloat(tpMatch[1]) : 0;
+            let reason = reasonMatch ? reasonMatch[1].trim() : 'Analysis based on current market conditions.';
+
+            // Validate entry is close to real price
+            if (Math.abs(entry - realPrice) > 50) {
+                entry = realPrice;
+            }
+
+            // Calculate SL/TP if not valid
+            const isBuy = bias.toLowerCase().includes('buy');
+            
+            if (!sl || Math.abs(sl - entry) > 100 || Math.abs(sl - entry) < 5) {
+                sl = isBuy ? entry - 20 : entry + 20;
+            }
+            
+            if (!tp || Math.abs(tp - entry) > 200 || Math.abs(tp - entry) < 10) {
+                tp = isBuy ? entry + 45 : entry - 45;
+            }
 
             return {
                 bias: bias,
                 entry: entry,
                 stopLoss: sl,
                 takeProfit: tp,
-                reason: reason
+                reason: reason,
+                currentPrice: realPrice
             };
         }
 
@@ -803,6 +941,10 @@ Important:
         function displayResult(data) {
             document.getElementById('aiPlaceholder').style.display = 'none';
             document.getElementById('aiResult').style.display = 'block';
+
+            // Current Price
+            document.getElementById('aiCurrentPrice').textContent = 
+                'Current: $' + data.currentPrice.toFixed(2);
 
             // Bias
             const biasEl = document.getElementById('aiBias');
@@ -815,6 +957,18 @@ Important:
             document.getElementById('aiSL').textContent = '$' + data.stopLoss.toFixed(0);
             document.getElementById('aiTP').textContent = '$' + data.takeProfit.toFixed(0);
 
+            // Calculate pips from current price
+            const entryDiff = data.entry - data.currentPrice;
+            const slDiff = data.stopLoss - data.entry;
+            const tpDiff = data.takeProfit - data.entry;
+
+            document.getElementById('entryPips').textContent = 
+                (entryDiff >= 0 ? '+' : '') + entryDiff.toFixed(0) + ' from now';
+            document.getElementById('slPips').textContent = 
+                slDiff.toFixed(0) + ' pips';
+            document.getElementById('tpPips').textContent = 
+                (tpDiff >= 0 ? '+' : '') + tpDiff.toFixed(0) + ' pips';
+
             // Reason
             document.getElementById('aiReason').textContent = data.reason;
 
@@ -823,7 +977,6 @@ Important:
             document.getElementById('aiTime').textContent = 
                 `Analyzed: ${analysisTime.toLocaleDateString()} ${analysisTime.toLocaleTimeString()}`;
 
-            // Update button to show cache status
             updateButtonState();
         }
 
@@ -836,7 +989,6 @@ Important:
                 button.innerHTML = `<span>Refresh in ${minutes}m</span>`;
                 button.disabled = true;
                 
-                // Re-enable after cache expires
                 setTimeout(() => {
                     button.innerHTML = '<span>Analyze</span>';
                     button.disabled = false;
@@ -851,14 +1003,20 @@ Important:
         // INITIALIZE
         // ============================================
         
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for cached analysis on load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Fetch real gold price on load
+            await fetchRealGoldPrice();
+            
+            // Check for cached analysis
             const cached = getCachedAnalysis();
             if (cached) {
                 displayResult(cached);
             }
             
             updateButtonState();
+
+            // Refresh price every 30 seconds
+            setInterval(fetchRealGoldPrice, 30000);
         });
     </script>
 
