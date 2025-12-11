@@ -78,12 +78,173 @@
             100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
         }
 
+        /* Sessions Container */
+        .sessions-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .session-card {
+            background: linear-gradient(145deg, #1a1a2e, #252538);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .session-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .session-card.active {
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .session-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+        }
+
+        .session-card.inactive {
+            opacity: 0.7;
+        }
+
+        .session-card.inactive::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Session Icon */
+        .session-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .session-card.tokyo .session-icon { filter: drop-shadow(0 0 10px #ff6b9d); }
+        .session-card.london .session-icon { filter: drop-shadow(0 0 10px #4a9eff); }
+        .session-card.newyork .session-icon { filter: drop-shadow(0 0 10px #ffd700); }
+
+        /* Session Name */
+        .session-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .session-card.tokyo .session-name { color: #ff6b9d; }
+        .session-card.london .session-name { color: #4a9eff; }
+        .session-card.newyork .session-name { color: #ffd700; }
+
+        /* Session Status */
+        .session-status {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .session-status.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            animation: statusPulse 2s infinite;
+        }
+
+        .session-status.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Session Timer */
+        .session-timer {
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-top: 5px;
+        }
+
+        .session-card.active .session-timer {
+            color: #00ff88;
+        }
+
+        .session-card.inactive .session-timer {
+            color: #ffd700;
+        }
+
+        .timer-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        /* Session Time Range */
+        .session-time-range {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Volatility Indicator */
+        .volatility-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin-top: 10px;
+        }
+
+        .volatility-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .volatility-dot.filled {
+            background: #ffd700;
+        }
+
+        .session-card.active .volatility-dot.filled {
+            background: #00ff88;
+            animation: dotPulse 1.5s infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
         /* Main Layout */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 450px;
             gap: 20px;
-            min-height: calc(100vh - 120px);
+            min-height: calc(100vh - 220px);
         }
 
         /* Chart Section */
@@ -239,7 +400,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 10px;
             flex-wrap: wrap;
         }
@@ -255,7 +416,7 @@
             color: #a78bfa;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
         }
 
@@ -264,7 +425,7 @@
             color: #ffd700;
             padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
         .ai-current-price {
@@ -280,7 +441,7 @@
         }
 
         .ai-bias {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -297,39 +458,31 @@
         .trade-levels {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .level-box {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
         }
 
-        .level-box.entry {
-            border: 1px solid rgba(102, 126, 234, 0.4);
-        }
-
-        .level-box.sl {
-            border: 1px solid rgba(255, 71, 87, 0.4);
-        }
-
-        .level-box.tp {
-            border: 1px solid rgba(0, 255, 136, 0.4);
-        }
+        .level-box.entry { border: 1px solid rgba(102, 126, 234, 0.4); }
+        .level-box.sl { border: 1px solid rgba(255, 71, 87, 0.4); }
+        .level-box.tp { border: 1px solid rgba(0, 255, 136, 0.4); }
 
         .level-label {
             font-size: 0.7rem;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .level-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
         }
 
@@ -338,39 +491,39 @@
         .level-box.tp .level-value { color: #00ff88; }
 
         .level-pips {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #666;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
-        /* Indicators Used */
+        /* Indicators Box */
         .indicators-box {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
         }
 
         .indicators-title {
             color: #667eea;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .indicators-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
         }
 
         .indicator-tag {
             background: rgba(102, 126, 234, 0.2);
             color: #a78bfa;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.7rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.6rem;
             font-weight: 500;
         }
 
@@ -378,63 +531,60 @@
         .ai-reason {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            padding: 15px;
+            padding: 12px;
             border-left: 3px solid #667eea;
         }
 
         .ai-reason-title {
             color: #a78bfa;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-bottom: 8px;
         }
 
         .ai-reason-text {
             color: #ccc;
-            font-size: 0.85rem;
-            line-height: 1.7;
+            font-size: 0.8rem;
+            line-height: 1.6;
         }
 
         /* AI Timestamp */
         .ai-timestamp {
             text-align: center;
             color: #666;
-            font-size: 0.75rem;
-            margin-top: 15px;
-            padding-top: 15px;
+            font-size: 0.7rem;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .cache-note {
-            color: #888;
-            font-size: 0.7rem;
-            margin-top: 5px;
+            color: #555;
+            font-size: 0.65rem;
+            margin-top: 3px;
         }
 
         /* Placeholder */
         .ai-placeholder {
             text-align: center;
-            padding: 50px 20px;
+            padding: 40px 20px;
             color: #666;
         }
 
         .ai-placeholder-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
         }
 
         .ai-placeholder-text {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
             color: #888;
+            margin-bottom: 8px;
         }
 
         .ai-placeholder-sub {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #555;
         }
 
@@ -448,9 +598,7 @@
             display: none;
         }
 
-        .api-setup.show {
-            display: block;
-        }
+        .api-setup.show { display: block; }
 
         .api-setup label {
             color: #ffd700;
@@ -498,7 +646,6 @@
             margin-top: 10px;
         }
 
-        /* Error */
         .error-msg {
             background: rgba(255, 71, 87, 0.1);
             border: 1px solid rgba(255, 71, 87, 0.3);
@@ -510,9 +657,7 @@
             display: none;
         }
 
-        .error-msg.show {
-            display: block;
-        }
+        .error-msg.show { display: block; }
 
         /* Responsive */
         @media (max-width: 1000px) {
@@ -529,8 +674,22 @@
                 gap: 10px;
             }
 
+            .sessions-container {
+                grid-template-columns: 1fr;
+            }
+
             .settings-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .session-card {
+                padding: 15px;
+            }
+
+            .session-timer {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -550,6 +709,60 @@
                 </div>
             </div>
         </header>
+
+        <!-- Trading Sessions -->
+        <div class="sessions-container">
+            <!-- Tokyo Session -->
+            <div class="session-card tokyo" id="tokyoSession">
+                <div class="session-icon">🗼</div>
+                <div class="session-name">Tokyo Session</div>
+                <div class="session-status" id="tokyoStatus">--</div>
+                <div class="session-timer" id="tokyoTimer">--:--:--</div>
+                <div class="timer-label" id="tokyoLabel">--</div>
+                <div class="volatility-bar">
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot"></div>
+                    <div class="volatility-dot"></div>
+                    <div class="volatility-dot"></div>
+                </div>
+                <div class="session-time-range">00:00 - 09:00 UTC</div>
+            </div>
+
+            <!-- London Session -->
+            <div class="session-card london" id="londonSession">
+                <div class="session-icon">🏰</div>
+                <div class="session-name">London Session</div>
+                <div class="session-status" id="londonStatus">--</div>
+                <div class="session-timer" id="londonTimer">--:--:--</div>
+                <div class="timer-label" id="londonLabel">--</div>
+                <div class="volatility-bar">
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot"></div>
+                </div>
+                <div class="session-time-range">07:00 - 16:00 UTC</div>
+            </div>
+
+            <!-- New York Session -->
+            <div class="session-card newyork" id="newyorkSession">
+                <div class="session-icon">🗽</div>
+                <div class="session-name">New York Session</div>
+                <div class="session-status" id="newyorkStatus">--</div>
+                <div class="session-timer" id="newyorkTimer">--:--:--</div>
+                <div class="timer-label" id="newyorkLabel">--</div>
+                <div class="volatility-bar">
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                    <div class="volatility-dot filled"></div>
+                </div>
+                <div class="session-time-range">12:00 - 21:00 UTC</div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <div class="main-grid">
@@ -643,10 +856,8 @@
                             <div class="ai-placeholder-sub">Click "Analyze Now" to get AI signal</div>
                         </div>
 
-                        <!-- Result (hidden initially) -->
+                        <!-- Result -->
                         <div id="aiResult" style="display: none;">
-                            
-                            <!-- Signal Display -->
                             <div class="ai-signal-display">
                                 <div class="ai-symbol-info">
                                     <span class="ai-symbol">XAUUSD</span>
@@ -659,7 +870,6 @@
                                 <div class="ai-bias" id="aiBias">--</div>
                             </div>
 
-                            <!-- Trade Levels -->
                             <div class="trade-levels">
                                 <div class="level-box entry">
                                     <div class="level-label">Entry</div>
@@ -678,21 +888,16 @@
                                 </div>
                             </div>
 
-                            <!-- Indicators Used -->
                             <div class="indicators-box">
                                 <div class="indicators-title">📊 Indicators Analyzed</div>
-                                <div class="indicators-list" id="indicatorsList">
-                                    <!-- Will be populated by JS -->
-                                </div>
+                                <div class="indicators-list" id="indicatorsList"></div>
                             </div>
 
-                            <!-- AI Reason -->
                             <div class="ai-reason">
                                 <div class="ai-reason-title">📝 Analysis</div>
                                 <div class="ai-reason-text" id="aiReason">--</div>
                             </div>
 
-                            <!-- Timestamp -->
                             <div class="ai-timestamp">
                                 <span id="aiTime">--</span>
                                 <div class="cache-note">Signal valid for 5 minutes</div>
@@ -721,11 +926,126 @@
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // TRADING SESSIONS
+        // ============================================
+        
+        const SESSIONS = {
+            tokyo: {
+                name: 'Tokyo',
+                startHour: 0,  // 00:00 UTC
+                endHour: 9,    // 09:00 UTC
+                element: 'tokyoSession',
+                status: 'tokyoStatus',
+                timer: 'tokyoTimer',
+                label: 'tokyoLabel'
+            },
+            london: {
+                name: 'London',
+                startHour: 7,  // 07:00 UTC
+                endHour: 16,   // 16:00 UTC
+                element: 'londonSession',
+                status: 'londonStatus',
+                timer: 'londonTimer',
+                label: 'londonLabel'
+            },
+            newyork: {
+                name: 'New York',
+                startHour: 12, // 12:00 UTC
+                endHour: 21,   // 21:00 UTC
+                element: 'newyorkSession',
+                status: 'newyorkStatus',
+                timer: 'newyorkTimer',
+                label: 'newyorkLabel'
+            }
+        };
+
+        function updateSessions() {
+            const now = new Date();
+            const utcHour = now.getUTCHours();
+            const utcMinute = now.getUTCMinutes();
+            const utcSecond = now.getUTCSeconds();
+
+            for (const [key, session] of Object.entries(SESSIONS)) {
+                const element = document.getElementById(session.element);
+                const statusEl = document.getElementById(session.status);
+                const timerEl = document.getElementById(session.timer);
+                const labelEl = document.getElementById(session.label);
+
+                // Check if session is active
+                let isActive = false;
+                if (session.startHour < session.endHour) {
+                    isActive = utcHour >= session.startHour && utcHour < session.endHour;
+                } else {
+                    // For sessions that cross midnight
+                    isActive = utcHour >= session.startHour || utcHour < session.endHour;
+                }
+
+                // Update classes
+                element.classList.remove('active', 'inactive');
+                element.classList.add(isActive ? 'active' : 'inactive');
+
+                // Update status
+                statusEl.classList.remove('active', 'inactive');
+                if (isActive) {
+                    statusEl.classList.add('active');
+                    statusEl.textContent = '● Session Active';
+                    
+                    // Calculate time until close
+                    let hoursUntilClose = session.endHour - utcHour - 1;
+                    let minutesUntilClose = 59 - utcMinute;
+                    let secondsUntilClose = 59 - utcSecond;
+
+                    if (hoursUntilClose < 0) hoursUntilClose += 24;
+
+                    timerEl.textContent = formatTime(hoursUntilClose, minutesUntilClose, secondsUntilClose);
+                    labelEl.textContent = 'Closes in';
+                } else {
+                    statusEl.classList.add('inactive');
+                    statusEl.textContent = '○ Session Closed';
+                    
+                    // Calculate time until open
+                    let hoursUntilOpen = session.startHour - utcHour;
+                    let minutesUntilOpen = 60 - utcMinute;
+                    let secondsUntilOpen = 60 - utcSecond;
+
+                    if (minutesUntilOpen === 60) {
+                        minutesUntilOpen = 0;
+                        secondsUntilOpen = 0;
+                    } else {
+                        hoursUntilOpen--;
+                    }
+
+                    if (secondsUntilOpen === 60) {
+                        secondsUntilOpen = 0;
+                        minutesUntilOpen++;
+                        if (minutesUntilOpen === 60) {
+                            minutesUntilOpen = 0;
+                            hoursUntilOpen++;
+                        }
+                    }
+
+                    if (hoursUntilOpen < 0) hoursUntilOpen += 24;
+
+                    timerEl.textContent = formatTime(hoursUntilOpen, minutesUntilOpen, secondsUntilOpen);
+                    labelEl.textContent = 'Opens in';
+                }
+            }
+        }
+
+        function formatTime(hours, minutes, seconds) {
+            return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+        }
+
+        // Update sessions every second
+        setInterval(updateSessions, 1000);
+        updateSessions(); // Initial call
+
+        // ============================================
+        // AI ANALYSIS CONFIGURATION
         // ============================================
         
         const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        const CACHE_DURATION = 5 * 60 * 1000;
         
         const FREE_MODELS = [
             'google/gemma-2-9b-it:free',
@@ -734,90 +1054,42 @@
             'mistralai/mistral-7b-instruct:free'
         ];
 
-        // All indicators for analysis
         const ALL_INDICATORS = [
-            'SMA', 'EMA', 'ICHIMOKU', 'BOLLINGER BANDS', 'ATR', 
-            'VWAP', 'SUPERTREND', 'PARABOLIC SAR', 'RSI', 'MACD', 
-            'KST', 'STOCHASTIC', 'ADX', 'PERCENT B', 'MFI', 
+            'SMA', 'EMA', 'ICHIMOKU', 'BANDS', 'ATR', 
+            'VWAP', 'SUPERTREND', 'SAR', 'RSI', 'MACD', 
+            'KST', 'STOCH', 'ADX', '%B', 'MFI', 
             'DPO', 'RVOL', 'A/D'
         ];
 
-        // Strategy configurations
         const STRATEGY_CONFIG = {
-            scalping: {
-                name: 'Scalping',
-                slRange: [8, 15],
-                tpRange: [12, 25],
-                description: 'Quick trades, tight stops, small targets'
-            },
-            swing: {
-                name: 'Swing Trading',
-                slRange: [20, 35],
-                tpRange: [40, 80],
-                description: 'Medium-term trades, wider stops, larger targets'
-            },
-            advanced: {
-                name: 'Advanced',
-                slRange: [15, 30],
-                tpRange: [30, 100],
-                description: 'Multi-indicator confluence, dynamic targets'
-            }
+            scalping: { name: 'Scalping', slRange: [8, 15], tpRange: [12, 25] },
+            swing: { name: 'Swing', slRange: [20, 35], tpRange: [40, 80] },
+            advanced: { name: 'Advanced', slRange: [15, 30], tpRange: [30, 100] }
         };
 
-        // Current gold price
         let currentGoldPrice = null;
 
         // ============================================
-        // FETCH REAL GOLD PRICE
+        // PRICE FETCHING
         // ============================================
         
         async function fetchRealGoldPrice() {
-            const sources = [
-                fetchFromMetalsLive,
-                fetchFromGoldAPI
-            ];
-
-            for (const source of sources) {
-                try {
-                    const price = await source();
-                    if (price && price > 1000) {
-                        currentGoldPrice = price;
-                        updateHeaderPrice(price);
-                        return price;
-                    }
-                } catch (e) {
-                    console.log('Price source failed:', e.message);
-                    continue;
+            try {
+                const response = await fetch('https://api.metals.live/v1/spot/gold');
+                const data = await response.json();
+                if (data && data[0] && data[0].price) {
+                    currentGoldPrice = data[0].price;
+                    document.getElementById('headerPrice').textContent = '$' + currentGoldPrice.toFixed(2);
+                    return currentGoldPrice;
                 }
+            } catch (e) {
+                console.log('Price fetch failed');
             }
-
             return null;
         }
 
-        async function fetchFromMetalsLive() {
-            const response = await fetch('https://api.metals.live/v1/spot/gold');
-            const data = await response.json();
-            if (data && data[0] && data[0].price) {
-                return data[0].price;
-            }
-            throw new Error('No price data');
-        }
-
-        async function fetchFromGoldAPI() {
-            const response = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
-            const data = await response.json();
-            if (data && data.items && data.items[0]) {
-                return data.items[0].xauPrice;
-            }
-            throw new Error('No price data');
-        }
-
-        function updateHeaderPrice(price) {
-            document.getElementById('headerPrice').textContent = '$' + price.toFixed(2);
-        }
-
         // ============================================
-        // API KEY MANAGEMENT
+        // API KEY & CACHE
         // ============================================
         
         function getApiKey() {
@@ -837,15 +1109,11 @@
         }
 
         function showError(msg) {
-            const errorEl = document.getElementById('errorMsg');
-            errorEl.textContent = msg;
-            errorEl.classList.add('show');
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.classList.add('show');
         }
 
-        // ============================================
-        // CACHE MANAGEMENT
-        // ============================================
-        
         function getCacheKey() {
             const strategy = document.getElementById('strategySelect').value;
             const timeframe = document.getElementById('timeframeSelect').value;
@@ -855,56 +1123,38 @@
         function getCachedAnalysis() {
             const cached = localStorage.getItem(getCacheKey());
             if (!cached) return null;
-            
             try {
                 const data = JSON.parse(cached);
-                const now = Date.now();
-                
-                if (now - data.timestamp < CACHE_DURATION) {
-                    return data;
-                }
-            } catch (e) {
-                return null;
-            }
-            
+                if (Date.now() - data.timestamp < CACHE_DURATION) return data;
+            } catch (e) {}
             return null;
         }
 
         function setCachedAnalysis(analysis) {
-            const data = {
-                ...analysis,
-                timestamp: Date.now()
-            };
-            localStorage.setItem(getCacheKey(), JSON.stringify(data));
+            localStorage.setItem(getCacheKey(), JSON.stringify({ ...analysis, timestamp: Date.now() }));
         }
 
         function getCacheTimeRemaining() {
             const cached = localStorage.getItem(getCacheKey());
             if (!cached) return 0;
-            
             try {
                 const data = JSON.parse(cached);
-                const elapsed = Date.now() - data.timestamp;
-                const remaining = CACHE_DURATION - elapsed;
+                const remaining = CACHE_DURATION - (Date.now() - data.timestamp);
                 return remaining > 0 ? remaining : 0;
-            } catch (e) {
-                return 0;
-            }
+            } catch (e) { return 0; }
         }
 
         // ============================================
-        // MAIN ANALYSIS FUNCTION
+        // AI ANALYSIS
         // ============================================
         
         async function getAIAnalysis() {
             const apiKey = getApiKey();
-            
             if (!apiKey) {
                 document.getElementById('apiSetup').classList.add('show');
                 return;
             }
 
-            // Check cache first
             const cached = getCachedAnalysis();
             if (cached) {
                 displayResult(cached);
@@ -914,267 +1164,135 @@
             const button = document.getElementById('aiBtn');
             const strategy = document.getElementById('strategySelect').value;
             const timeframe = document.getElementById('timeframeSelect').value;
-            
-            // Loading state
+
             button.disabled = true;
             button.innerHTML = '<div class="loading-spinner"></div><span>Fetching price...</span>';
 
-            // Fetch real gold price
-            let price = currentGoldPrice;
+            let price = currentGoldPrice || await fetchRealGoldPrice();
             if (!price) {
-                price = await fetchRealGoldPrice();
-            }
-
-            // If still no price, ask user
-            if (!price) {
-                price = prompt('Enter current XAU/USD price (e.g., 3250):');
-                price = parseFloat(price);
-                if (!price || isNaN(price)) {
+                price = parseFloat(prompt('Enter current XAU/USD price:'));
+                if (!price) {
                     button.disabled = false;
                     button.innerHTML = '<span>🔍 Analyze Now</span>';
-                    showError('Invalid price');
                     return;
                 }
                 currentGoldPrice = price;
-                updateHeaderPrice(price);
             }
 
-            button.innerHTML = '<div class="loading-spinner"></div><span>Analyzing with AI...</span>';
+            button.innerHTML = '<div class="loading-spinner"></div><span>Analyzing...</span>';
 
-            // Try each model
-            let success = false;
-            let lastError = '';
-
-            for (let i = 0; i < FREE_MODELS.length && !success; i++) {
+            for (const model of FREE_MODELS) {
                 try {
-                    const model = FREE_MODELS[i];
-                    console.log('Trying model:', model);
-                    
                     const result = await callAI(apiKey, model, price, strategy, timeframe);
                     if (result) {
                         setCachedAnalysis(result);
                         displayResult(result);
-                        success = true;
+                        break;
                     }
-                } catch (error) {
-                    console.log('Model failed:', error.message);
-                    lastError = error.message;
-                    continue;
+                } catch (e) {
+                    console.log('Model failed:', e.message);
                 }
             }
 
-            if (!success) {
-                document.getElementById('apiSetup').classList.add('show');
-                showError('Error: ' + lastError);
-                
-                if (lastError.includes('401') || lastError.includes('key')) {
-                    localStorage.removeItem('openrouter_api_key');
-                }
-            }
-
-            // Reset button
             button.disabled = false;
             button.innerHTML = '<span>🔍 Analyze Now</span>';
             updateButtonState();
         }
 
-        // ============================================
-        // AI API CALL
-        // ============================================
-        
-        async function callAI(apiKey, model, realPrice, strategy, timeframe) {
+        async function callAI(apiKey, model, price, strategy, timeframe) {
             const now = new Date();
-            const hour = now.getUTCHours();
-            const day = now.getUTCDay();
-            
-            // Determine session
-            let session = 'Asian Session';
-            if (hour >= 7 && hour < 12) session = 'London Session';
-            else if (hour >= 12 && hour < 17) session = 'London-NY Overlap';
-            else if (hour >= 17 && hour < 21) session = 'New York Session';
-            
-            const isWeekend = (day === 0 || day === 6);
             const config = STRATEGY_CONFIG[strategy];
 
-            const prompt = `You are an expert XAU/USD gold trading analyst. Analyze using ALL these indicators:
+            // Get active session
+            const utcHour = now.getUTCHours();
+            let activeSession = 'Asian';
+            if (utcHour >= 7 && utcHour < 16) activeSession = 'London';
+            if (utcHour >= 12 && utcHour < 21) activeSession = 'New York';
+            if (utcHour >= 12 && utcHour < 16) activeSession = 'London-NY Overlap';
 
-INDICATORS TO ANALYZE:
-${ALL_INDICATORS.join(', ')}
+            const prompt = `Expert XAU/USD analyst. Analyze using: ${ALL_INDICATORS.join(', ')}
 
-CURRENT DATA:
-- Symbol: XAUUSD (Gold)
-- Current Price: $${realPrice.toFixed(2)}
-- Time: ${now.toUTCString()}
-- Session: ${session}
-- Market: ${isWeekend ? 'CLOSED' : 'OPEN'}
+CURRENT: $${price.toFixed(2)} | ${activeSession} Session | ${timeframe} timeframe | ${config.name} strategy
 
-STRATEGY: ${config.name.toUpperCase()}
-${config.description}
-- Stop Loss Range: ${config.slRange[0]}-${config.slRange[1]} pips
-- Take Profit Range: ${config.tpRange[0]}-${config.tpRange[1]} pips
-
-TIMEFRAME: ${timeframe.toUpperCase()}
-
-Analyze the ${timeframe} chart using ALL indicators listed above. Provide response in this EXACT format:
-
-BIAS: [Strong Buy / Buy / Neutral Buy / Neutral / Neutral Sell / Sell / Strong Sell]
-ENTRY: [price close to ${realPrice.toFixed(0)}]
-STOP_LOSS: [price]
-TAKE_PROFIT: [price]
-REASON: [Detailed ${timeframe} analysis mentioning specific indicators. Example: "On ${timeframe}: RSI at 65 showing bullish momentum, price above EMA20/50. MACD histogram positive. Bollinger Bands showing expansion. Supertrend bullish. ADX at 28 confirming trend strength. Stochastic not yet overbought. VWAP acting as support. Ichimoku cloud bullish."]
-
-RULES:
-- Entry must be within ±5 of current price $${realPrice.toFixed(0)}
-- For ${strategy}: SL ${config.slRange[0]}-${config.slRange[1]} pips, TP ${config.tpRange[0]}-${config.tpRange[1]} pips
-- REASON must mention at least 6 specific indicators with values
-- Be specific about ${timeframe} timeframe analysis`;
+Respond in this EXACT format only:
+BIAS: [Strong Buy/Buy/Neutral Buy/Neutral/Neutral Sell/Sell/Strong Sell]
+ENTRY: [price within ±5 of ${price.toFixed(0)}]
+STOP_LOSS: [${config.slRange[0]}-${config.slRange[1]} pips from entry]
+TAKE_PROFIT: [${config.tpRange[0]}-${config.tpRange[1]} pips from entry]
+REASON: [2-3 sentences mentioning 6+ indicators with values for ${timeframe} timeframe]`;
 
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.href,
-                    'X-Title': 'XAUUSD AI Analysis'
+                    'HTTP-Referer': window.location.href
                 },
                 body: JSON.stringify({
                     model: model,
                     messages: [{ role: 'user', content: prompt }],
-                    max_tokens: 600,
+                    max_tokens: 500,
                     temperature: 0.2
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-            }
-
+            if (!response.ok) throw new Error('API failed');
             const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'API Error');
+            if (data.choices?.[0]?.message?.content) {
+                return parseAnalysis(data.choices[0].message.content, price, strategy, timeframe);
             }
-
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                const content = data.choices[0].message.content;
-                return parseAnalysis(content, realPrice, strategy, timeframe);
-            }
-
             throw new Error('Invalid response');
         }
 
-        // ============================================
-        // PARSE AI RESPONSE
-        // ============================================
-        
-        function parseAnalysis(content, realPrice, strategy, timeframe) {
-            console.log('AI Response:', content);
-            
+        function parseAnalysis(content, price, strategy, timeframe) {
             const config = STRATEGY_CONFIG[strategy];
-            
-            // Parse fields
-            const biasMatch = content.match(/BIAS:\s*(.+?)(?:\n|$)/i);
-            const entryMatch = content.match(/ENTRY:\s*\$?(\d+\.?\d*)/i);
-            const slMatch = content.match(/STOP_LOSS:\s*\$?(\d+\.?\d*)/i);
-            const tpMatch = content.match(/TAKE_PROFIT:\s*\$?(\d+\.?\d*)/i);
-            const reasonMatch = content.match(/REASON:\s*(.+)/is);
+            const bias = content.match(/BIAS:\s*(.+?)(?:\n|$)/i)?.[1]?.trim() || 'Neutral';
+            let entry = parseFloat(content.match(/ENTRY:\s*\$?(\d+\.?\d*)/i)?.[1]) || price;
+            let sl = parseFloat(content.match(/STOP_LOSS:\s*\$?(\d+\.?\d*)/i)?.[1]) || 0;
+            let tp = parseFloat(content.match(/TAKE_PROFIT:\s*\$?(\d+\.?\d*)/i)?.[1]) || 0;
+            const reason = content.match(/REASON:\s*(.+)/is)?.[1]?.trim() || 'Technical analysis.';
 
-            let bias = biasMatch ? biasMatch[1].trim() : 'Neutral';
-            let entry = entryMatch ? parseFloat(entryMatch[1]) : realPrice;
-            let sl = slMatch ? parseFloat(slMatch[1]) : 0;
-            let tp = tpMatch ? parseFloat(tpMatch[1]) : 0;
-            let reason = reasonMatch ? reasonMatch[1].trim() : 'Analysis based on technical indicators.';
-
-            // Validate entry
-            if (Math.abs(entry - realPrice) > 20) {
-                entry = realPrice;
-            }
-
-            // Determine direction
+            if (Math.abs(entry - price) > 20) entry = price;
             const isBuy = bias.toLowerCase().includes('buy');
-            
-            // Calculate proper SL/TP based on strategy
             const avgSL = (config.slRange[0] + config.slRange[1]) / 2;
             const avgTP = (config.tpRange[0] + config.tpRange[1]) / 2;
+            if (!sl || Math.abs(sl - entry) < 5) sl = isBuy ? entry - avgSL : entry + avgSL;
+            if (!tp || Math.abs(tp - entry) < 10) tp = isBuy ? entry + avgTP : entry - avgTP;
 
-            if (!sl || Math.abs(sl - entry) < config.slRange[0] || Math.abs(sl - entry) > config.slRange[1] * 2) {
-                sl = isBuy ? entry - avgSL : entry + avgSL;
-            }
-            
-            if (!tp || Math.abs(tp - entry) < config.tpRange[0] || Math.abs(tp - entry) > config.tpRange[1] * 2) {
-                tp = isBuy ? entry + avgTP : entry - avgTP;
-            }
-
-            return {
-                bias: bias,
-                entry: entry,
-                stopLoss: sl,
-                takeProfit: tp,
-                reason: reason,
-                currentPrice: realPrice,
-                strategy: strategy,
-                timeframe: timeframe,
-                indicators: ALL_INDICATORS
-            };
+            return { bias, entry, stopLoss: sl, takeProfit: tp, reason, currentPrice: price, strategy, timeframe, indicators: ALL_INDICATORS };
         }
 
-        // ============================================
-        // DISPLAY RESULT
-        // ============================================
-        
         function displayResult(data) {
             document.getElementById('aiPlaceholder').style.display = 'none';
             document.getElementById('aiResult').style.display = 'block';
 
-            // Badges
-            document.getElementById('strategyBadge').textContent = 
-                STRATEGY_CONFIG[data.strategy].name.toUpperCase();
-            document.getElementById('timeframeBadge').textContent = 
-                data.timeframe.toUpperCase();
+            document.getElementById('strategyBadge').textContent = STRATEGY_CONFIG[data.strategy].name.toUpperCase();
+            document.getElementById('timeframeBadge').textContent = data.timeframe.toUpperCase();
+            document.getElementById('aiCurrentPrice').textContent = '$' + data.currentPrice.toFixed(2);
 
-            // Current Price
-            document.getElementById('aiCurrentPrice').textContent = 
-                '$' + data.currentPrice.toFixed(2);
-
-            // Bias
             const biasEl = document.getElementById('aiBias');
-            const biasLower = data.bias.toLowerCase().replace(/\s+/g, '-');
             biasEl.textContent = data.bias;
-            biasEl.className = 'ai-bias ' + biasLower;
+            biasEl.className = 'ai-bias ' + data.bias.toLowerCase().replace(/\s+/g, '-');
 
-            // Levels
             document.getElementById('aiEntry').textContent = '$' + data.entry.toFixed(0);
             document.getElementById('aiSL').textContent = '$' + data.stopLoss.toFixed(0);
             document.getElementById('aiTP').textContent = '$' + data.takeProfit.toFixed(0);
 
-            // Pips
-            const entryDiff = data.entry - data.currentPrice;
-            const slDiff = Math.abs(data.stopLoss - data.entry);
-            const tpDiff = Math.abs(data.takeProfit - data.entry);
+            document.getElementById('entryPips').textContent = (data.entry - data.currentPrice >= 0 ? '+' : '') + (data.entry - data.currentPrice).toFixed(0);
+            document.getElementById('slPips').textContent = Math.abs(data.stopLoss - data.entry).toFixed(0) + ' pips';
+            document.getElementById('tpPips').textContent = Math.abs(data.takeProfit - data.entry).toFixed(0) + ' pips';
 
-            document.getElementById('entryPips').textContent = 
-                (entryDiff >= 0 ? '+' : '') + entryDiff.toFixed(0) + ' from now';
-            document.getElementById('slPips').textContent = slDiff.toFixed(0) + ' pips risk';
-            document.getElementById('tpPips').textContent = tpDiff.toFixed(0) + ' pips target';
-
-            // Indicators list
-            const indicatorsList = document.getElementById('indicatorsList');
-            indicatorsList.innerHTML = '';
-            data.indicators.forEach(ind => {
+            const list = document.getElementById('indicatorsList');
+            list.innerHTML = '';
+            data.indicators.forEach(i => {
                 const tag = document.createElement('span');
                 tag.className = 'indicator-tag';
-                tag.textContent = ind;
-                indicatorsList.appendChild(tag);
+                tag.textContent = i;
+                list.appendChild(tag);
             });
 
-            // Reason
             document.getElementById('aiReason').textContent = data.reason;
-
-            // Timestamp
-            const analysisTime = new Date(data.timestamp || Date.now());
-            document.getElementById('aiTime').textContent = 
-                `Analyzed: ${analysisTime.toLocaleDateString()} ${analysisTime.toLocaleTimeString()}`;
+            document.getElementById('aiTime').textContent = `Analyzed: ${new Date(data.timestamp || Date.now()).toLocaleString()}`;
 
             updateButtonState();
         }
@@ -1182,30 +1300,18 @@ RULES:
         function updateButtonState() {
             const button = document.getElementById('aiBtn');
             const remaining = getCacheTimeRemaining();
-            
             if (remaining > 0) {
-                const minutes = Math.ceil(remaining / 60000);
-                button.innerHTML = `<span>⏱️ Refresh in ${minutes}m</span>`;
+                button.innerHTML = `<span>⏱️ Refresh in ${Math.ceil(remaining / 60000)}m</span>`;
                 button.disabled = true;
-                
                 setTimeout(() => {
                     button.innerHTML = '<span>🔍 Analyze Now</span>';
                     button.disabled = false;
                 }, remaining);
-            } else {
-                button.innerHTML = '<span>🔍 Analyze Now</span>';
-                button.disabled = false;
             }
         }
 
-        // Reset cache when settings change
-        document.getElementById('strategySelect').addEventListener('change', function() {
-            updateButtonState();
-        });
-
-        document.getElementById('timeframeSelect').addEventListener('change', function() {
-            updateButtonState();
-        });
+        document.getElementById('strategySelect').addEventListener('change', updateButtonState);
+        document.getElementById('timeframeSelect').addEventListener('change', updateButtonState);
 
         // ============================================
         // INITIALIZE
@@ -1213,15 +1319,9 @@ RULES:
         
         document.addEventListener('DOMContentLoaded', async function() {
             await fetchRealGoldPrice();
-            
             const cached = getCachedAnalysis();
-            if (cached) {
-                displayResult(cached);
-            }
-            
+            if (cached) displayResult(cached);
             updateButtonState();
-
-            // Refresh price every 30 seconds
             setInterval(fetchRealGoldPrice, 30000);
         });
     </script>
