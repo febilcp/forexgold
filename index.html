@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Live Chart & Signal</title>
+    <title>XAU/USD Live Chart & AI Analysis</title>
     <style>
         * {
             margin: 0;
@@ -69,9 +69,9 @@
         /* Main Layout */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 420px;
             gap: 20px;
-            height: calc(100vh - 120px);
+            min-height: calc(100vh - 120px);
         }
 
         /* Chart Section */
@@ -80,6 +80,7 @@
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255, 215, 0, 0.1);
+            min-height: 600px;
         }
 
         .chart-container {
@@ -100,7 +101,6 @@
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255, 215, 0, 0.1);
-            flex: 1;
         }
 
         .signal-header {
@@ -116,133 +116,293 @@
         }
 
         .signal-widget {
-            height: calc(100% - 45px);
+            height: 280px;
         }
 
-        /* Info Box */
-        .info-box {
-            background: linear-gradient(145deg, #1a1a2e, #252538);
+        /* AI Analysis Box */
+        .ai-box {
+            background: #1a1a2e;
             border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            overflow: hidden;
         }
 
-        .info-title {
-            color: #ffd700;
+        .ai-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .ai-header h2 {
+            color: #a78bfa;
             font-size: 1rem;
-            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .info-content {
-            color: #aaa;
+        .ai-content {
+            padding: 15px;
+        }
+
+        /* AI Button */
+        .ai-button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* AI Signal Display */
+        .ai-signal-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .ai-bias {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .ai-bias.strong-buy { color: #00ff88; }
+        .ai-bias.buy { color: #7dffb3; }
+        .ai-bias.neutral-buy { color: #b8ffda; }
+        .ai-bias.neutral { color: #ffd700; }
+        .ai-bias.neutral-sell { color: #ffb3b3; }
+        .ai-bias.sell { color: #ff7a7a; }
+        .ai-bias.strong-sell { color: #ff4757; }
+
+        .ai-symbol {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* Trade Levels */
+        .trade-levels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .level-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .level-box.entry {
+            border: 1px solid rgba(102, 126, 234, 0.4);
+        }
+
+        .level-box.sl {
+            border: 1px solid rgba(255, 71, 87, 0.4);
+        }
+
+        .level-box.tp {
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .level-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .level-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .level-box.entry .level-value { color: #a78bfa; }
+        .level-box.sl .level-value { color: #ff4757; }
+        .level-box.tp .level-value { color: #00ff88; }
+
+        /* AI Reason */
+        .ai-reason {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 3px solid #667eea;
+        }
+
+        .ai-reason-title {
+            color: #a78bfa;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ai-reason-text {
+            color: #ccc;
             font-size: 0.85rem;
             line-height: 1.6;
         }
 
-        .info-content strong {
-            color: #fff;
-        }
-
-        .signal-guide {
+        /* AI Timestamp */
+        .ai-timestamp {
+            text-align: center;
+            color: #666;
+            font-size: 0.75rem;
             margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .guide-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-        }
-
-        .guide-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .guide-dot.buy { background: #00ff88; }
-        .guide-dot.sell { background: #ff4757; }
-        .guide-dot.neutral { background: #ffd700; }
-
-        .guide-text {
-            color: #ccc;
-        }
-
-        /* Timeframe Selector */
-        .timeframe-box {
-            background: #1a1a2e;
-            border-radius: 15px;
-            padding: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.1);
-        }
-
-        .timeframe-title {
+        .cache-note {
             color: #888;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.7rem;
+            margin-top: 5px;
         }
 
-        .timeframe-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        /* Placeholder */
+        .ai-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
         }
 
-        .tf-btn {
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.05);
+        .ai-placeholder-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .ai-placeholder-text {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* API Setup */
+        .api-setup {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .api-setup.show {
+            display: block;
+        }
+
+        .api-setup label {
+            color: #ffd700;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .api-setup input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            color: #888;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
+            color: #fff;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
 
-        .tf-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.3);
-            color: #ffd700;
+        .api-setup input:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
-        .tf-btn.active {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-            color: #ffd700;
-        }
-
-        /* Disclaimer */
-        .disclaimer {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.2);
-            border-radius: 10px;
-            padding: 12px 15px;
+        .api-note {
             font-size: 0.75rem;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .api-note a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .api-save-btn {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Error */
+        .error-msg {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.8rem;
             color: #ff6b7a;
-            text-align: center;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
         }
 
         /* Responsive */
         @media (max-width: 1000px) {
             .main-grid {
                 grid-template-columns: 1fr;
-                height: auto;
             }
 
             .chart-section {
-                height: 500px;
-            }
-
-            .signal-box {
-                height: 450px;
+                min-height: 450px;
             }
         }
     </style>
@@ -286,7 +446,7 @@
                             "save_image": false,
                             "container_id": "tradingview_chart",
                             "hide_volume": false,
-                            "studies": ["STD;RSI", "STD;MACD"]
+                            "studies": ["STD;Bollinger_Bands", "STD;RSI", "STD;MACD"]
                         });
                         </script>
                     </div>
@@ -296,26 +456,12 @@
             <!-- Signal Section -->
             <div class="signal-section">
 
-                <!-- Timeframe Selector -->
-                <div class="timeframe-box">
-                    <div class="timeframe-title">Select Timeframe</div>
-                    <div class="timeframe-buttons">
-                        <button class="tf-btn" onclick="changeTimeframe('1m')">1m</button>
-                        <button class="tf-btn" onclick="changeTimeframe('5m')">5m</button>
-                        <button class="tf-btn active" onclick="changeTimeframe('15m')">15m</button>
-                        <button class="tf-btn" onclick="changeTimeframe('1h')">1H</button>
-                        <button class="tf-btn" onclick="changeTimeframe('4h')">4H</button>
-                        <button class="tf-btn" onclick="changeTimeframe('1D')">1D</button>
-                    </div>
-                </div>
-
-                <!-- Main Signal Widget -->
+                <!-- TradingView Signal -->
                 <div class="signal-box">
                     <div class="signal-header">
-                        <h2>📊 Buy/Sell Signal</h2>
+                        <h2>📊 Technical Signal</h2>
                     </div>
-                    <div class="signal-widget" id="signalWidget">
-                        <!-- TradingView Technical Analysis Widget -->
+                    <div class="signal-widget">
                         <div class="tradingview-widget-container" style="height:100%;">
                             <div class="tradingview-widget-container__widget" style="height:100%;"></div>
                             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
@@ -325,7 +471,7 @@
                                 "isTransparent": true,
                                 "height": "100%",
                                 "symbol": "OANDA:XAUUSD",
-                                "showIntervalTabs": false,
+                                "showIntervalTabs": true,
                                 "locale": "en",
                                 "colorTheme": "dark"
                             }
@@ -334,39 +480,66 @@
                     </div>
                 </div>
 
-                <!-- How to Use -->
-                <div class="info-box">
-                    <div class="info-title">📖 How to Read Signal</div>
-                    <div class="info-content">
-                        This signal is calculated from <strong>26 technical indicators</strong> including RSI, MACD, Moving Averages, Stochastic, ADX, CCI, and more.
+                <!-- AI Analysis Box -->
+                <div class="ai-box">
+                    <div class="ai-header">
+                        <h2>🤖 AI Analysis</h2>
+                        <button class="ai-button" id="aiBtn" onclick="getAIAnalysis()">
+                            <span>Analyze</span>
+                        </button>
                     </div>
-                    <div class="signal-guide">
-                        <div class="guide-item">
-                            <div class="guide-dot buy"></div>
-                            <span class="guide-text"><strong>STRONG BUY</strong> - Most indicators bullish</span>
+                    <div class="ai-content" id="aiContent">
+                        <!-- Placeholder -->
+                        <div class="ai-placeholder" id="aiPlaceholder">
+                            <div class="ai-placeholder-icon">🤖</div>
+                            <div class="ai-placeholder-text">Click "Analyze" to get AI trading signal</div>
                         </div>
-                        <div class="guide-item">
-                            <div class="guide-dot buy" style="opacity: 0.6;"></div>
-                            <span class="guide-text"><strong>BUY</strong> - More buy than sell signals</span>
-                        </div>
-                        <div class="guide-item">
-                            <div class="guide-dot neutral"></div>
-                            <span class="guide-text"><strong>NEUTRAL</strong> - Wait, don't trade</span>
-                        </div>
-                        <div class="guide-item">
-                            <div class="guide-dot sell" style="opacity: 0.6;"></div>
-                            <span class="guide-text"><strong>SELL</strong> - More sell than buy signals</span>
-                        </div>
-                        <div class="guide-item">
-                            <div class="guide-dot sell"></div>
-                            <span class="guide-text"><strong>STRONG SELL</strong> - Most indicators bearish</span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Disclaimer -->
-                <div class="disclaimer">
-                    ⚠️ Trading involves risk. This is for educational purposes only. Always use stop loss.
+                        <!-- Result (hidden initially) -->
+                        <div id="aiResult" style="display: none;">
+                            <div class="ai-signal-display">
+                                <div class="ai-symbol">XAUUSD</div>
+                                <div class="ai-bias" id="aiBias">--</div>
+                            </div>
+
+                            <div class="trade-levels">
+                                <div class="level-box entry">
+                                    <div class="level-label">Entry</div>
+                                    <div class="level-value" id="aiEntry">--</div>
+                                </div>
+                                <div class="level-box sl">
+                                    <div class="level-label">Stop Loss</div>
+                                    <div class="level-value" id="aiSL">--</div>
+                                </div>
+                                <div class="level-box tp">
+                                    <div class="level-label">Take Profit</div>
+                                    <div class="level-value" id="aiTP">--</div>
+                                </div>
+                            </div>
+
+                            <div class="ai-reason">
+                                <div class="ai-reason-title">📝 Analysis Reason</div>
+                                <div class="ai-reason-text" id="aiReason">--</div>
+                            </div>
+
+                            <div class="ai-timestamp">
+                                <span id="aiTime">--</span>
+                                <div class="cache-note">Signal cached for 5 minutes to prevent repainting</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Setup -->
+                    <div class="api-setup" id="apiSetup">
+                        <label>🔑 OpenRouter API Key (FREE)</label>
+                        <input type="password" id="apiKeyInput" placeholder="sk-or-v1-xxxxxxxx">
+                        <p class="api-note">
+                            Get FREE key: <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a><br>
+                            Sign up → Create Key → Paste here
+                        </p>
+                        <button class="api-save-btn" onclick="saveApiKey()">Save & Analyze</button>
+                        <div class="error-msg" id="errorMsg"></div>
+                    </div>
                 </div>
 
             </div>
@@ -376,49 +549,317 @@
     </div>
 
     <script>
-        // Timeframe change function
-        function changeTimeframe(tf) {
-            // Update active button
-            document.querySelectorAll('.tf-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
+        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+        
+        const FREE_MODELS = [
+            'google/gemma-2-9b-it:free',
+            'meta-llama/llama-3.2-3b-instruct:free',
+            'qwen/qwen-2-7b-instruct:free',
+            'mistralai/mistral-7b-instruct:free'
+        ];
 
-            // Reload the widget with new timeframe
-            const widgetContainer = document.getElementById('signalWidget');
-            
-            // Create new widget HTML
-            const widgetHTML = `
-                <div class="tradingview-widget-container" style="height:100%;">
-                    <div class="tradingview-widget-container__widget" style="height:100%;"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                    {
-                        "interval": "${tf}",
-                        "width": "100%",
-                        "isTransparent": true,
-                        "height": "100%",
-                        "symbol": "OANDA:XAUUSD",
-                        "showIntervalTabs": false,
-                        "locale": "en",
-                        "colorTheme": "dark"
-                    }
-                    <\/script>
-                </div>
-            `;
-            
-            widgetContainer.innerHTML = widgetHTML;
-            
-            // Re-execute the script
-            const scripts = widgetContainer.getElementsByTagName('script');
-            for (let script of scripts) {
-                const newScript = document.createElement('script');
-                newScript.type = 'text/javascript';
-                newScript.src = script.src;
-                newScript.async = true;
-                newScript.innerHTML = script.innerHTML;
-                script.parentNode.replaceChild(newScript, script);
+        // ============================================
+        // API KEY MANAGEMENT
+        // ============================================
+        
+        function getApiKey() {
+            return localStorage.getItem('openrouter_api_key') || '';
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key && key.length > 10) {
+                localStorage.setItem('openrouter_api_key', key);
+                document.getElementById('apiSetup').classList.remove('show');
+                document.getElementById('errorMsg').classList.remove('show');
+                getAIAnalysis();
+            } else {
+                showError('Please enter a valid API key');
             }
         }
+
+        function showError(msg) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+        }
+
+        // ============================================
+        // CACHE MANAGEMENT - PREVENTS REPAINTING
+        // ============================================
+        
+        function getCachedAnalysis() {
+            const cached = localStorage.getItem('xauusd_analysis');
+            if (!cached) return null;
+            
+            try {
+                const data = JSON.parse(cached);
+                const now = Date.now();
+                
+                // Check if cache is still valid (5 minutes)
+                if (now - data.timestamp < CACHE_DURATION) {
+                    return data;
+                }
+            } catch (e) {
+                return null;
+            }
+            
+            return null;
+        }
+
+        function setCachedAnalysis(analysis) {
+            const data = {
+                ...analysis,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('xauusd_analysis', JSON.stringify(data));
+        }
+
+        function getCacheTimeRemaining() {
+            const cached = localStorage.getItem('xauusd_analysis');
+            if (!cached) return 0;
+            
+            try {
+                const data = JSON.parse(cached);
+                const elapsed = Date.now() - data.timestamp;
+                const remaining = CACHE_DURATION - elapsed;
+                return remaining > 0 ? remaining : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        // ============================================
+        // MAIN ANALYSIS FUNCTION
+        // ============================================
+        
+        async function getAIAnalysis() {
+            const apiKey = getApiKey();
+            
+            if (!apiKey) {
+                document.getElementById('apiSetup').classList.add('show');
+                return;
+            }
+
+            // Check cache first
+            const cached = getCachedAnalysis();
+            if (cached) {
+                displayResult(cached);
+                return;
+            }
+
+            const button = document.getElementById('aiBtn');
+            
+            // Loading state
+            button.disabled = true;
+            button.innerHTML = '<div class="loading-spinner"></div><span>Analyzing...</span>';
+
+            // Try each model
+            let success = false;
+            let lastError = '';
+
+            for (let i = 0; i < FREE_MODELS.length && !success; i++) {
+                try {
+                    const model = FREE_MODELS[i];
+                    console.log('Trying model:', model);
+                    
+                    const result = await callAI(apiKey, model);
+                    if (result) {
+                        // Cache the result
+                        setCachedAnalysis(result);
+                        displayResult(result);
+                        success = true;
+                    }
+                } catch (error) {
+                    console.log('Model failed:', error.message);
+                    lastError = error.message;
+                    continue;
+                }
+            }
+
+            if (!success) {
+                document.getElementById('apiSetup').classList.add('show');
+                showError('Error: ' + lastError);
+                
+                if (lastError.includes('401') || lastError.includes('key')) {
+                    localStorage.removeItem('openrouter_api_key');
+                }
+            }
+
+            // Reset button
+            button.disabled = false;
+            button.innerHTML = '<span>Analyze</span>';
+        }
+
+        // ============================================
+        // AI API CALL
+        // ============================================
+        
+        async function callAI(apiKey, model) {
+            const now = new Date();
+            const hour = now.getUTCHours();
+            const day = now.getUTCDay();
+            
+            // Determine session
+            let session = 'Asian Session (Low Volatility)';
+            if (hour >= 7 && hour < 12) session = 'London Session (High Volatility)';
+            else if (hour >= 12 && hour < 17) session = 'London-NY Overlap (Highest Volatility)';
+            else if (hour >= 17 && hour < 21) session = 'New York Session (Medium Volatility)';
+            
+            const isWeekend = (day === 0 || day === 6);
+
+            const prompt = `You are a professional gold (XAU/USD) technical analyst. Provide a detailed trading analysis.
+
+Current Time: ${now.toUTCString()}
+Session: ${session}
+Market Status: ${isWeekend ? 'CLOSED - Weekend' : 'OPEN'}
+
+Analyze XAU/USD and provide your response in EXACTLY this format (no other text):
+
+BIAS: [Strong Buy / Buy / Neutral Buy / Neutral / Neutral Sell / Sell / Strong Sell]
+ENTRY: [price number only, e.g., 3245]
+STOP_LOSS: [price number only, e.g., 3220]
+TAKE_PROFIT: [price number only, e.g., 3280]
+REASON: [Your detailed technical analysis in 2-3 sentences. Include timeframe analysis (15m, 30m, 1H), Bollinger Bands position, RSI, MACD, support/resistance levels, price action patterns. Be specific about price levels.]
+
+Important: 
+- Use realistic current gold prices (around $3200-3400 range)
+- Entry, SL, TP must be specific numbers
+- REASON must be detailed technical analysis`;
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'XAUUSD Analysis'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 400,
+                    temperature: 0.2  // Low temperature for more consistent output
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message || 'API Error');
+            }
+
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                const content = data.choices[0].message.content;
+                return parseAnalysis(content);
+            }
+
+            throw new Error('Invalid response');
+        }
+
+        // ============================================
+        // PARSE AI RESPONSE
+        // ============================================
+        
+        function parseAnalysis(content) {
+            console.log('AI Response:', content);
+            
+            // Parse each field
+            const biasMatch = content.match(/BIAS:\s*(.+?)(?:\n|$)/i);
+            const entryMatch = content.match(/ENTRY:\s*\$?(\d+\.?\d*)/i);
+            const slMatch = content.match(/STOP_LOSS:\s*\$?(\d+\.?\d*)/i);
+            const tpMatch = content.match(/TAKE_PROFIT:\s*\$?(\d+\.?\d*)/i);
+            const reasonMatch = content.match(/REASON:\s*(.+)/is);
+
+            const bias = biasMatch ? biasMatch[1].trim() : 'Neutral';
+            const entry = entryMatch ? parseFloat(entryMatch[1]) : 3250;
+            const sl = slMatch ? parseFloat(slMatch[1]) : entry - 25;
+            const tp = tpMatch ? parseFloat(tpMatch[1]) : entry + 40;
+            const reason = reasonMatch ? reasonMatch[1].trim() : 'Technical analysis based on current market conditions.';
+
+            return {
+                bias: bias,
+                entry: entry,
+                stopLoss: sl,
+                takeProfit: tp,
+                reason: reason
+            };
+        }
+
+        // ============================================
+        // DISPLAY RESULT
+        // ============================================
+        
+        function displayResult(data) {
+            document.getElementById('aiPlaceholder').style.display = 'none';
+            document.getElementById('aiResult').style.display = 'block';
+
+            // Bias
+            const biasEl = document.getElementById('aiBias');
+            const biasLower = data.bias.toLowerCase().replace(/\s+/g, '-');
+            biasEl.textContent = data.bias;
+            biasEl.className = 'ai-bias ' + biasLower;
+
+            // Levels
+            document.getElementById('aiEntry').textContent = '$' + data.entry.toFixed(0);
+            document.getElementById('aiSL').textContent = '$' + data.stopLoss.toFixed(0);
+            document.getElementById('aiTP').textContent = '$' + data.takeProfit.toFixed(0);
+
+            // Reason
+            document.getElementById('aiReason').textContent = data.reason;
+
+            // Timestamp
+            const analysisTime = new Date(data.timestamp || Date.now());
+            document.getElementById('aiTime').textContent = 
+                `Analyzed: ${analysisTime.toLocaleDateString()} ${analysisTime.toLocaleTimeString()}`;
+
+            // Update button to show cache status
+            updateButtonState();
+        }
+
+        function updateButtonState() {
+            const button = document.getElementById('aiBtn');
+            const remaining = getCacheTimeRemaining();
+            
+            if (remaining > 0) {
+                const minutes = Math.ceil(remaining / 60000);
+                button.innerHTML = `<span>Refresh in ${minutes}m</span>`;
+                button.disabled = true;
+                
+                // Re-enable after cache expires
+                setTimeout(() => {
+                    button.innerHTML = '<span>Analyze</span>';
+                    button.disabled = false;
+                }, remaining);
+            } else {
+                button.innerHTML = '<span>Analyze</span>';
+                button.disabled = false;
+            }
+        }
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for cached analysis on load
+            const cached = getCachedAnalysis();
+            if (cached) {
+                displayResult(cached);
+            }
+            
+            updateButtonState();
+        });
     </script>
 
 </body>
