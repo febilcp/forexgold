@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Advanced AI Analysis</title>
+    <title>XAU/USD AI Chart Vision Analysis</title>
     <style>
         * {
             margin: 0;
@@ -19,9 +19,9 @@
         }
 
         .container {
-            max-width: 1700px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 12px;
+            padding: 15px;
         }
 
         /* Header */
@@ -29,16 +29,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 18px;
+            padding: 15px 20px;
             background: rgba(255, 215, 0, 0.05);
-            border-radius: 10px;
-            margin-bottom: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
             border: 1px solid rgba(255, 215, 0, 0.15);
         }
 
         .header h1 {
             font-size: 1.4rem;
             color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .live-dot {
@@ -47,8 +56,6 @@
             background: #00ff88;
             border-radius: 50%;
             animation: pulse 2s infinite;
-            display: inline-block;
-            margin-right: 6px;
         }
 
         @keyframes pulse {
@@ -56,40 +63,12 @@
             50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
         }
 
-        /* Live Price Widget */
-        .price-widget-section {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .price-widget-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .price-widget-title {
-            color: #ffd700;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .price-widget-container {
-            height: 70px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
         /* Sessions */
         .sessions-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .session-card {
@@ -108,21 +87,14 @@
         .session-card.active::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 2px;
             background: #00ff88;
+            border-radius: 10px 10px 0 0;
         }
 
         .session-icon { font-size: 1.2rem; }
-        
-        .session-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin: 4px 0;
-        }
-
+        .session-name { font-size: 0.8rem; font-weight: 600; margin: 4px 0; }
         .session-card:nth-child(1) .session-name { color: #ff6b9d; }
         .session-card:nth-child(2) .session-name { color: #4a9eff; }
         .session-card:nth-child(3) .session-name { color: #ffd700; }
@@ -133,16 +105,8 @@
             border-radius: 10px;
             display: inline-block;
         }
-
-        .session-status.active {
-            background: rgba(0, 255, 136, 0.15);
-            color: #00ff88;
-        }
-
-        .session-status.inactive {
-            background: rgba(255, 255, 255, 0.1);
-            color: #666;
-        }
+        .session-status.active { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+        .session-status.inactive { background: rgba(255, 255, 255, 0.1); color: #666; }
 
         .session-timer {
             font-size: 0.85rem;
@@ -150,48 +114,161 @@
             font-family: monospace;
             margin-top: 4px;
         }
-
         .session-card.active .session-timer { color: #00ff88; }
         .session-card.inactive .session-timer { color: #ffd700; }
-
-        .timer-label {
-            font-size: 0.55rem;
-            color: #555;
-        }
+        .timer-label { font-size: 0.55rem; color: #555; }
 
         /* Main Layout */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 480px;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            min-height: calc(100vh - 280px);
         }
 
-        /* Chart */
-        .chart-section {
+        /* Upload Section */
+        .upload-section {
             background: #12121a;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 20px;
+        }
+
+        .upload-title {
+            color: #ffd700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(255, 215, 0, 0.4);
             border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 215, 0, 0.1);
-            min-height: 550px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 215, 0, 0.02);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .drop-zone.drag-over {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .drop-zone.has-image {
+            padding: 10px;
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .drop-text {
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .drop-subtext {
+            color: #555;
+            font-size: 0.75rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Preview Image */
+        .preview-container {
+            width: 100%;
+            display: none;
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .preview-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .preview-btn.remove {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .preview-btn.remove:hover {
+            background: rgba(255, 71, 87, 0.3);
+        }
+
+        /* Paste Info */
+        .paste-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .paste-info-text {
+            color: #a78bfa;
+            font-size: 0.8rem;
+        }
+
+        .paste-shortcut {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #fff;
         }
 
         /* AI Section */
         .ai-section {
+            background: #12121a;
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .ai-box {
-            background: #12121a;
-            border-radius: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            overflow: hidden;
         }
 
         .ai-header {
-            padding: 15px;
+            padding: 15px 20px;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.1));
             border-bottom: 1px solid rgba(102, 126, 234, 0.2);
         }
@@ -199,107 +276,11 @@
         .ai-header h2 {
             color: #a78bfa;
             font-size: 1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 15px;
         }
 
-        /* Price & Market Context Inputs */
-        .input-section {
-            background: rgba(255, 215, 0, 0.08);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .input-section-title {
-            color: #ffd700;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .price-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .price-input {
-            flex: 1;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 215, 0, 0.4);
-            border-radius: 8px;
-            color: #ffd700;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .price-input:focus {
-            outline: none;
-            border-color: #ffd700;
-        }
-
-        /* Market Context Buttons */
-        .context-group {
-            margin-bottom: 10px;
-        }
-
-        .context-label {
-            color: #888;
-            font-size: 0.7rem;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .context-buttons {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .context-btn {
-            padding: 8px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            color: #888;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .context-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .context-btn.selected {
-            background: rgba(0, 255, 136, 0.2);
-            border-color: #00ff88;
-            color: #00ff88;
-        }
-
-        .context-btn.selected.bearish {
-            background: rgba(255, 71, 87, 0.2);
-            border-color: #ff4757;
-            color: #ff4757;
-        }
-
-        .context-btn.selected.neutral {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-            color: #ffd700;
-        }
-
-        /* Settings Grid */
-        .settings-grid {
+        /* Settings */
+        .settings-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
@@ -323,33 +304,38 @@
             font-size: 0.8rem;
         }
 
-        /* API Section */
-        .api-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
+        /* API Input */
+        .api-section {
+            margin-bottom: 12px;
         }
 
         .api-input {
-            flex: 1;
+            width: 100%;
             padding: 10px;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             color: #fff;
             font-size: 0.8rem;
+            margin-bottom: 5px;
         }
 
         .api-link {
             color: #667eea;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             text-decoration: none;
+        }
+
+        .api-note {
+            color: #666;
+            font-size: 0.65rem;
+            margin-top: 5px;
         }
 
         /* Analyze Button */
         .ai-button {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
             border-radius: 10px;
@@ -360,24 +346,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 10px;
         }
 
-        .ai-button:hover {
+        .ai-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
         }
 
         .ai-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .spinner {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
@@ -390,20 +374,27 @@
 
         /* AI Content */
         .ai-content {
-            padding: 15px;
-            max-height: 500px;
+            padding: 20px;
+            flex: 1;
             overflow-y: auto;
+            max-height: 500px;
         }
 
         .ai-placeholder {
             text-align: center;
-            padding: 25px;
+            padding: 40px 20px;
             color: #555;
         }
 
         .ai-placeholder-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .ai-placeholder-text {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
         }
 
         /* Result */
@@ -415,48 +406,38 @@
             display: block;
         }
 
+        /* Signal Box */
         .signal-box {
             text-align: center;
-            padding: 20px;
+            padding: 25px;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            margin-bottom: 12px;
+            border-radius: 15px;
+            margin-bottom: 15px;
         }
 
         .signal-badges {
             display: flex;
             justify-content: center;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
         .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.6rem;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.65rem;
             font-weight: 600;
         }
 
         .badge.gold { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
         .badge.purple { background: rgba(102, 126, 234, 0.2); color: #a78bfa; }
         .badge.green { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
-        .badge.blue { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
-
-        .signal-price {
-            color: #888;
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-        }
-
-        .signal-price span {
-            color: #ffd700;
-            font-weight: bold;
-        }
 
         .signal-bias {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
+            margin: 10px 0;
         }
 
         .signal-bias.strong-buy { color: #00ff88; }
@@ -467,27 +448,26 @@
         .signal-bias.sell { color: #ff7a7a; }
         .signal-bias.strong-sell { color: #ff4757; }
 
-        .confidence-bar {
+        .confidence-row {
             margin-top: 10px;
         }
 
         .confidence-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #888;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
-        .confidence-track {
-            height: 6px;
+        .confidence-bar {
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .confidence-fill {
             height: 100%;
-            border-radius: 3px;
-            transition: width 0.5s;
+            border-radius: 4px;
         }
 
         .confidence-fill.high { background: linear-gradient(90deg, #00ff88, #00cc6a); }
@@ -498,29 +478,29 @@
         .levels-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .level-card {
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 12px 8px;
+            border-radius: 10px;
+            padding: 15px 10px;
             text-align: center;
         }
 
-        .level-card.entry { border: 1px solid rgba(102, 126, 234, 0.3); }
-        .level-card.sl { border: 1px solid rgba(255, 71, 87, 0.3); }
-        .level-card.tp { border: 1px solid rgba(0, 255, 136, 0.3); }
+        .level-card.entry { border: 1px solid rgba(102, 126, 234, 0.4); }
+        .level-card.sl { border: 1px solid rgba(255, 71, 87, 0.4); }
+        .level-card.tp { border: 1px solid rgba(0, 255, 136, 0.4); }
 
         .level-label {
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             color: #666;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
         .level-value {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
         }
 
@@ -529,145 +509,62 @@
         .level-card.tp .level-value { color: #00ff88; }
 
         .level-pips {
-            font-size: 0.55rem;
-            color: #555;
-            margin-top: 2px;
-        }
-
-        /* SMC Analysis Box */
-        .smc-box {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .smc-title {
-            color: #a78bfa;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .smc-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .smc-item {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            padding: 8px;
-        }
-
-        .smc-item-label {
             font-size: 0.6rem;
-            color: #666;
-            margin-bottom: 3px;
+            color: #555;
+            margin-top: 3px;
         }
 
-        .smc-item-value {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .smc-item-value.bullish { color: #00ff88; }
-        .smc-item-value.bearish { color: #ff4757; }
-        .smc-item-value.neutral { color: #ffd700; }
-
-        /* Indicators Box */
-        .indicators-box {
+        /* Analysis Box */
+        .analysis-box {
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 12px;
-        }
-
-        .indicators-title {
-            font-size: 0.65rem;
-            color: #667eea;
-            margin-bottom: 8px;
-        }
-
-        .indicators-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-        }
-
-        .indicator-item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 4px;
-            padding: 6px;
-            text-align: center;
-        }
-
-        .indicator-name {
-            font-size: 0.55rem;
-            color: #666;
-        }
-
-        .indicator-signal {
-            font-size: 0.65rem;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .indicator-signal.buy { color: #00ff88; }
-        .indicator-signal.sell { color: #ff4757; }
-        .indicator-signal.neutral { color: #ffd700; }
-
-        /* Reason */
-        .reason-box {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 15px;
             border-left: 3px solid #667eea;
         }
 
-        .reason-title {
-            font-size: 0.7rem;
+        .analysis-title {
             color: #a78bfa;
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .reason-text {
-            font-size: 0.8rem;
+        .analysis-text {
             color: #ccc;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
         }
 
         .timestamp {
             text-align: center;
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             color: #444;
-            margin-top: 12px;
+            margin-top: 15px;
         }
 
         /* Error */
         .error-box {
             background: rgba(255, 71, 87, 0.1);
             border: 1px solid rgba(255, 71, 87, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 12px;
             text-align: center;
             display: none;
         }
 
         .error-box.show { display: block; }
-        .error-box p { color: #ff6b7a; font-size: 0.8rem; }
+        .error-box p { color: #ff6b7a; font-size: 0.85rem; }
 
         /* Responsive */
-        @media (max-width: 1000px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .chart-section { min-height: 400px; }
-            .sessions-grid { grid-template-columns: 1fr; }
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .sessions-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -677,34 +574,12 @@
 
         <!-- Header -->
         <header class="header">
-            <h1>🥇 XAU/USD Advanced AI</h1>
-            <div>
+            <h1>🥇 XAU/USD AI Vision Analysis</h1>
+            <div class="live-badge">
                 <span class="live-dot"></span>
-                <span style="color: #00ff88; font-size: 0.9rem;">LIVE</span>
+                <span style="color: #00ff88; font-size: 0.85rem;">LIVE</span>
             </div>
         </header>
-
-        <!-- Live Price Widget -->
-        <div class="price-widget-section">
-            <div class="price-widget-header">
-                <span class="price-widget-title">📊 Live Price - Copy to Input Below ↓</span>
-            </div>
-            <div class="price-widget-container">
-                <div class="tradingview-widget-container">
-                    <div class="tradingview-widget-container__widget"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                    {
-                        "symbol": "OANDA:XAUUSD",
-                        "width": "100%",
-                        "height": "70",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "locale": "en"
-                    }
-                    </script>
-                </div>
-            </div>
-        </div>
 
         <!-- Sessions -->
         <div class="sessions-grid">
@@ -734,6 +609,71 @@
         <!-- Main Grid -->
         <div class="main-grid">
 
-            <!-- Chart -->
-            <div class="chart-section">
-                <div c
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2 class="upload-title">📸 Upload Your Chart Screenshot</h2>
+                
+                <div class="drop-zone" id="dropZone">
+                    <div id="dropContent">
+                        <div class="drop-icon">📊</div>
+                        <div class="drop-text">Drop chart image here or click to upload</div>
+                        <div class="drop-subtext">Supports: PNG, JPG, JPEG, WebP</div>
+                    </div>
+                    <div class="preview-container" id="previewContainer">
+                        <img class="preview-image" id="previewImage" alt="Chart Preview">
+                        <div class="preview-actions">
+                            <button class="preview-btn remove" onclick="removeImage()">🗑️ Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="file" class="file-input" id="fileInput" accept="image/*">
+
+                <div class="paste-info">
+                    <div class="paste-info-text">
+                        💡 Pro Tip: Take screenshot and press <span class="paste-shortcut">Ctrl+V</span> to paste directly!
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Section -->
+            <div class="ai-section">
+                <div class="ai-header">
+                    <h2>🤖 AI Vision Analysis</h2>
+
+                    <div class="settings-row">
+                        <div class="setting-item">
+                            <label>Strategy</label>
+                            <select class="setting-select" id="strategySelect">
+                                <option value="scalping">⚡ Scalping</option>
+                                <option value="intraday" selected>📊 Intraday</option>
+                                <option value="swing">📈 Swing</option>
+                                <option value="smc">🎯 SMC/ICT</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Timeframe</label>
+                            <select class="setting-select" id="timeframeSelect">
+                                <option value="1m">1M</option>
+                                <option value="5m">5M</option>
+                                <option value="15m" selected>15M</option>
+                                <option value="30m">30M</option>
+                                <option value="1h">1H</option>
+                                <option value="4h">4H</option>
+                                <option value="1d">1D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="api-section">
+                        <input type="password" class="api-input" id="apiInput" placeholder="🔑 Google Gemini API Key">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">Get FREE Gemini API Key →</a>
+                        <div class="api-note">⚡ Gemini has FREE vision/image analysis!</div>
+                    </div>
+
+                    <button class="ai-button" id="analyzeBtn" onclick="analyzeChart()">
+                        🔍 Analyze Chart with AI Vision
+                    </button>
+
+                    <div class="error-box" id="errorBox">
+                        <p id="errorText"></p>
+                    <
