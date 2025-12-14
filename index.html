@@ -235,11 +235,6 @@
 
     <script>
         // ================= TIMING & MARKET LOGIC =================
-        
-        // Define Sessions in GMT (UTC)
-        // Tokyo: 00:00 - 09:00 GMT
-        // London: 08:00 - 17:00 GMT
-        // New York: 13:00 - 22:00 GMT
         const sessionConfigs = {
             tokyo: { start: 0, end: 9, name: "Tokyo" },
             london: { start: 8, end: 17, name: "London" },
@@ -248,47 +243,37 @@
 
         function updateMarketStatus() {
             const now = new Date();
-            const day = now.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+            const day = now.getUTCDay(); // 0=Sun, 6=Sat
             const hour = now.getUTCHours();
-            const minute = now.getUTCMinutes();
-            const second = now.getUTCSeconds();
-
-            // === 1. CHECK GLOBAL MARKET STATUS ===
-            // Market Closes: Friday ~22:00 GMT
-            // Market Opens: Sunday ~22:00 GMT
+            
+            // Market Logic (Simple Global: Closed Sat & Sun until 22:00 UTC)
             let isMarketClosed = false;
-            let timeToMarketOpen = 0; // in milliseconds
+            let timeToMarketOpen = 0;
 
-            // Saturday (All Day)
-            if (day === 6) {
+            if (day === 6) { // Saturday
                 isMarketClosed = true;
-                // Opens Sunday at 22:00 GMT
-                // Days until Sunday = 1, plus time until 22:00
                 const target = new Date(now);
-                target.setUTCDate(now.getUTCDate() + 1); // Sunday
+                target.setUTCDate(now.getUTCDate() + 1);
                 target.setUTCHours(22, 0, 0, 0);
                 timeToMarketOpen = target - now;
             }
-            // Sunday (Before 22:00 GMT)
-            else if (day === 0 && hour < 22) {
+            else if (day === 0 && hour < 22) { // Sunday before open
                 isMarketClosed = true;
                 const target = new Date(now);
                 target.setUTCHours(22, 0, 0, 0);
                 timeToMarketOpen = target - now;
             }
-            // Friday (After 22:00 GMT)
-            else if (day === 5 && hour >= 22) {
+            else if (day === 5 && hour >= 22) { // Friday after close
                 isMarketClosed = true;
-                // Opens Sunday at 22:00 GMT (2 days later)
                 const target = new Date(now);
                 target.setUTCDate(now.getUTCDate() + 2);
                 target.setUTCHours(22, 0, 0, 0);
                 timeToMarketOpen = target - now;
             }
 
-            // Update Header Badge
             const statusEl = document.getElementById('marketStatus');
             const statusText = document.getElementById('marketStatusText');
+            
             if (isMarketClosed) {
                 statusEl.className = 'market-status market-closed';
                 statusText.innerHTML = `CLOSED • OPENS IN ${formatTime(timeToMarketOpen)}`;
@@ -297,15 +282,12 @@
                 statusText.textContent = "MARKET OPEN • LIVE";
             }
 
-            // === 2. UPDATE SESSION TIMERS ===
+            // Session Timers
             Object.keys(sessionConfigs).forEach(key => {
                 const config = sessionConfigs[key];
                 const card = document.getElementById(key + 'Card');
                 const label = document.getElementById(key + 'Label');
                 const timer = document.getElementById(key + 'Timer');
-                
-                // If Global Market is Closed, everyone is waiting for Market Open (Sunday 22:00 GMT) or their Monday Start
-                // For simplicity, if Market Closed, we countdown to Monday Open for that session
                 
                 let isOpen = false;
                 let targetTime = new Date(now);
@@ -313,12 +295,12 @@
                 let timerClass = "";
 
                 if (isMarketClosed) {
-                    // Weekend Logic: Find next Monday start time
-                    let daysToAdd = (1 - day + 7) % 7; // Distance to Monday
-                    if (daysToAdd === 0 && hour >= config.end) daysToAdd = 7; // If it's Monday but passed, go next week (rare case in logic)
-                    if (day === 0) daysToAdd = 1; // Sunday -> Monday
-                    if (day === 6) daysToAdd = 2; // Saturday -> Monday
-                    if (day === 5) daysToAdd = 3; // Friday -> Monday
+                    // Weekend Logic
+                    let daysToAdd = (1 - day + 7) % 7; 
+                    if (daysToAdd === 0 && hour >= config.end) daysToAdd = 7;
+                    if (day === 0) daysToAdd = 1;
+                    if (day === 6) daysToAdd = 2;
+                    if (day === 5) daysToAdd = 3;
 
                     targetTime.setUTCDate(now.getUTCDate() + daysToAdd);
                     targetTime.setUTCHours(config.start, 0, 0, 0);
@@ -326,34 +308,26 @@
                     labelText = "OPENS MONDAY";
                     timerClass = "timer-waiting";
                     isOpen = false;
-                } 
-                else {
-                    // Normal Weekday Logic
+                } else {
+                    // Weekday Logic
                     if (hour >= config.start && hour < config.end) {
-                        // Session is OPEN -> Count to Close
                         isOpen = true;
                         targetTime.setUTCHours(config.end, 0, 0, 0);
                         labelText = "CLOSES IN";
                         timerClass = "timer-open";
                     } else {
-                        // Session is CLOSED -> Count to Open
                         isOpen = false;
                         labelText = "OPENS IN";
                         timerClass = "timer-closed";
-                        
                         if (hour >= config.end) {
-                            // Opens tomorrow
                             targetTime.setUTCDate(now.getUTCDate() + 1);
-                            targetTime.setUTCHours(config.start, 0, 0, 0);
-                        } else {
-                            // Opens today later
-                            targetTime.setUTCHours(config.start, 0, 0, 0);
                         }
+                        targetTime.setUTCHours(config.start, 0, 0, 0);
                     }
                 }
 
                 let diff = targetTime - now;
-                if(diff < 0) diff = 0; // Safety
+                if(diff < 0) diff = 0;
 
                 card.classList.toggle('active', isOpen);
                 timer.textContent = formatTime(diff);
@@ -370,9 +344,7 @@
             return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
         }
 
-        function pad(num) {
-            return num.toString().padStart(2, '0');
-        }
+        function pad(num) { return num.toString().padStart(2, '0'); }
 
         setInterval(updateMarketStatus, 1000);
         updateMarketStatus();
@@ -385,7 +357,6 @@
         let currentImageBase64 = null;
 
         dropZone.onclick = () => { if(!currentImageBase64) fileInput.click(); };
-        
         fileInput.onchange = e => handleFile(e.target.files[0]);
         
         dropZone.ondragover = e => { e.preventDefault(); dropZone.style.borderColor = '#00ff88'; };
@@ -430,62 +401,55 @@
         if(savedKey) document.getElementById('apiKey').value = savedKey;
 
         async function runAnalysis() {
-            const key = document.getElementById('apiKey').value;
-            if(!key) return alert('Please enter OpenRouter API Key');
-            if(!currentImageBase64) return alert('Please upload a chart image first');
+            const key = document.getElementById('apiKey').value.trim();
+            const statusText = document.getElementById('loadingText');
+            
+            if(!key) return alert('⚠️ Error: Please enter your OpenRouter API Key.');
+            if(!currentImageBase64) return alert('⚠️ Error: Please upload a chart image first.');
 
             localStorage.setItem('or_key', key);
             
-            // UI State
             document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultCard').classList.remove('show');
-            document.getElementById('loadingText').innerText = "AI is analyzing structure...";
+            statusText.innerText = "Initializing AI...";
 
-            // Better Prompt Engineering for Precision
             const strategy = document.getElementById('strategy').value;
             const risk = document.getElementById('riskMode').value;
 
             const prompt = `
-            You are a professional Gold (XAUUSD) Trader. Analyze this chart image.
-            
-            STRATEGY: ${strategy}
-            RISK_PROFILE: ${risk}
+            You are an expert Forex Analyst.
+            Analyze this chart for XAU/USD (Gold).
+            Strategy: ${strategy}
+            Risk: ${risk}
 
-            INSTRUCTIONS:
-            1. Identify the specific Current Price visible on the chart.
-            2. Identify Market Structure (Bullish/Bearish/Ranging).
-            3. Look for Order Blocks, FVG, or Key Levels close to price.
-            4. DECISION RULES:
-               - If price is at a key level: Signal = BUY/SELL (Market Execution).
-               - If price is FAR from a key level: Signal = WAIT or LIMIT ORDER.
-               - DO NOT say "Buy" if the price is in the middle of a range.
-
-            OUTPUT FORMAT:
-            You must return ONLY valid JSON:
+            Return ONLY valid JSON with this structure:
             {
-                "bias": "BUY" | "SELL" | "WAIT",
-                "confidence": number (0-100),
-                "action_type": "MARKET" | "LIMIT" | "NONE",
-                "current_price": number,
-                "entry_price": number,
-                "stop_loss": number,
-                "take_profit": number,
-                "reasoning": "Short concise explanation of structure and why."
+                "bias": "BUY" or "SELL" or "WAIT",
+                "confidence": 85,
+                "action_type": "MARKET" or "LIMIT",
+                "current_price": 2050.50,
+                "entry_price": 2050.50,
+                "stop_loss": 2045.00,
+                "take_profit": 2065.00,
+                "reasoning": "Clear support bounce observed."
             }
+            Do not add markdown. Just raw JSON.
             `;
 
             const models = [
-                'google/gemini-2.0-flash-exp:free', // Fast & Good Vision
-                'meta-llama/llama-3.2-11b-vision-instruct:free', // Good Vision
-                'google/gemini-flash-1.5' // Backup
+                'google/gemini-2.0-flash-exp:free',
+                'meta-llama/llama-3.2-11b-vision-instruct:free',
+                'google/gemini-flash-1.5'
             ];
 
             let result = null;
+            let lastError = "";
 
             for (const model of models) {
+                if (result) break;
                 try {
-                    document.getElementById('loadingText').innerText = `Consulting model: ${model.split('/')[1]}...`;
+                    statusText.innerText = `Trying model: ${model.split('/')[1]}...`;
                     
                     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
@@ -493,6 +457,7 @@
                             "Authorization": `Bearer ${key}`,
                             "Content-Type": "application/json",
                             "HTTP-Referer": window.location.href,
+                            "X-Title": "Gold AI Analyst"
                         },
                         body: JSON.stringify({
                             "model": model,
@@ -509,17 +474,23 @@
                         })
                     });
 
-                    const data = await response.json();
-                    if(data.choices && data.choices[0].message.content) {
-                        let content = data.choices[0].message.content;
-                        // Clean markdown if present
-                        content = content.replace(/```json/g, '').replace(/```/g, '');
-                        result = JSON.parse(content);
-                        break; // Success
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(`API Error (${response.status}): ${errData.error?.message || response.statusText}`);
                     }
+
+                    const data = await response.json();
+                    if(!data.choices || !data.choices[0] || !data.choices[0].message.content) {
+                        throw new Error("Empty response from AI");
+                    }
+
+                    let content = data.choices[0].message.content;
+                    content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+                    result = JSON.parse(content);
+
                 } catch (e) {
-                    console.error("Model failed", e);
-                    continue; // Try next model
+                    console.error(`${model} failed:`, e);
+                    lastError = e.message;
                 }
             }
 
@@ -529,19 +500,17 @@
             if(result) {
                 displayResults(result);
             } else {
-                alert("Analysis failed. Please try a clearer screenshot or check API key.");
+                alert(`❌ ANALYSIS FAILED\n\nReason: ${lastError}\n\nTroubleshooting:\n1. Check API Key.\n2. Check Image format.\n3. Check internet connection.`);
             }
         }
 
         function displayResults(data) {
             const card = document.getElementById('resultCard');
             
-            // Bias Formatting
             const biasEl = document.getElementById('outBias');
             biasEl.innerText = data.bias;
             biasEl.className = 'bias-large bias-' + data.bias.toLowerCase();
 
-            // Action Type Logic
             const typeEl = document.getElementById('outType');
             let actionType = data.action_type || 'MARKET';
             
@@ -562,16 +531,14 @@
             document.getElementById('outTP').innerText = data.take_profit || '--';
             document.getElementById('outReason').innerText = data.reasoning;
 
-            // Pips Calculation
             if(data.entry_price && data.stop_loss) {
-                const slPips = Math.abs(data.entry_price - data.stop_loss) * 10; // Gold pips
+                const slPips = Math.abs(data.entry_price - data.stop_loss) * 10;
                 document.getElementById('outSLPips').innerText = slPips.toFixed(1) + ' pips';
                 
                 if(data.take_profit) {
                     const tpPips = Math.abs(data.take_profit - data.entry_price) * 10;
                     document.getElementById('outTPPips').innerText = tpPips.toFixed(1) + ' pips';
                     
-                    // Risk Reward
                     const rr = tpPips / slPips;
                     document.getElementById('outRR').innerText = "1:" + rr.toFixed(2);
                     document.getElementById('outRR').style.color = rr > 1.5 ? '#00ff88' : '#ffd700';
