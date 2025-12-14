@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Pro AI Analyst</title>
+    <title>XAU/USD Pro Analyst (Precision Fix)</title>
     <style>
         /* ================= STYLES ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,64 +11,54 @@
         
         .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
 
-        /* Header & Market Status */
+        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(20, 20, 30, 0.5); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .header h1 { font-size: 1.4rem; color: #ffd700; display: flex; align-items: center; gap: 10px; }
+        .header h1 { font-size: 1.4rem; color: #ffd700; }
         
-        /* Market Status Badge */
-        .market-status {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .market-status { padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .market-open { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.2); }
         .market-closed { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.2); }
-        
         .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* Sessions Grid */
+        /* Sessions */
         .sessions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .session-card { background: #13131f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); position: relative; overflow: hidden; }
+        .session-card { background: #13131f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); }
         .session-card.active { border-color: #00ff88; background: linear-gradient(145deg, #13131f, #1a2a20); }
         .session-icon { font-size: 1.5rem; margin-bottom: 5px; }
         .session-name { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
-        
-        .session-time-box { background: rgba(0,0,0,0.3); padding: 5px; border-radius: 6px; display: inline-block; width: 100%; }
-        .session-status-text { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; display: block; }
         .session-timer { font-size: 1rem; font-family: 'Courier New', monospace; font-weight: 700; }
-        
-        /* Colors for timer states */
-        .timer-open { color: #00ff88; }
-        .timer-closed { color: #888; }
-        .timer-waiting { color: #ffd700; }
+        .timer-open { color: #00ff88; } .timer-closed { color: #888; } .timer-waiting { color: #ffd700; }
 
         /* Main Grid */
         .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
-        /* Upload Section */
+        /* Upload */
         .upload-section { background: #13131f; border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.05); }
         .drop-zone { border: 2px dashed #333; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2); min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .drop-zone:hover { border-color: #ffd700; background: rgba(255, 215, 0, 0.02); }
-        .drop-zone.has-image { padding: 10px; border: 2px solid #444; }
+        .drop-zone:hover { border-color: #ffd700; }
         .preview-image { max-width: 100%; max-height: 400px; border-radius: 8px; display: none; }
         .preview-image.show { display: block; }
-        .drop-content { pointer-events: none; }
         .drop-content.hide { display: none; }
 
         /* Controls */
         .ai-section { background: #13131f; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; overflow: hidden; }
         .ai-controls { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .control-select { background: #0a0a12; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; outline: none; }
-        .api-input { width: 100%; background: #0a0a12; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
         
-        .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, #ffd700, #ffaa00); border: none; border-radius: 8px; color: #000; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .control-group { margin-bottom: 15px; }
+        .control-label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; font-weight: 600; }
+        
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .control-select, .api-input { width: 100%; background: #0a0a12; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
+        .control-select:focus, .api-input:focus { border-color: #ffd700; }
+
+        /* Price Input - Key Feature */
+        .price-input-group { position: relative; }
+        .price-input-group span { position: absolute; left: 12px; top: 12px; color: #ffd700; font-weight: bold; }
+        .price-input { padding-left: 25px; border-color: #ffd700; background: rgba(255, 215, 0, 0.05); }
+
+        .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, #ffd700, #ffaa00); border: none; border-radius: 8px; color: #000; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1rem; margin-top: 10px; }
         .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); }
         .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
@@ -82,38 +72,20 @@
         .signal-card.show { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Bias Header */
         .bias-header { text-align: center; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .bias-large { font-size: 2.5rem; font-weight: 900; margin: 5px 0; letter-spacing: 1px; }
-        .bias-sub { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .bias-buy { color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
-        .bias-sell { color: #ff4757; text-shadow: 0 0 20px rgba(255, 71, 87, 0.3); }
-        .bias-wait { color: #888; }
+        .bias-buy { color: #00ff88; } .bias-sell { color: #ff4757; } .bias-wait { color: #888; }
 
-        /* Trade Plan */
         .trade-plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .plan-box { background: rgba(0,0,0,0.3); padding: 15px 10px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
         .plan-label { font-size: 0.7rem; color: #888; margin-bottom: 5px; font-weight: 700; }
         .plan-val { font-size: 1.1rem; font-weight: 700; color: #fff; }
+        .entry-box .plan-val { color: #8da2fb; }
+        .sl-box .plan-val { color: #ff4757; }
+        .tp-box .plan-val { color: #00ff88; }
         .plan-pips { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
 
-        .entry-box { border-color: rgba(100, 100, 255, 0.3); }
-        .entry-box .plan-val { color: #8da2fb; }
-        .sl-box { border-color: rgba(255, 71, 87, 0.3); }
-        .sl-box .plan-val { color: #ff4757; }
-        .tp-box { border-color: rgba(0, 255, 136, 0.3); }
-        .tp-box .plan-val { color: #00ff88; }
-
-        /* Type Badge */
-        .order-type { text-align: center; margin-bottom: 15px; }
-        .type-badge { padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #333; color: #ccc; }
-        .type-badge.market { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
-        .type-badge.limit { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
-
         .analysis-text { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; color: #ccc; white-space: pre-wrap; border-left: 3px solid #666; }
-        .rr-ratio { text-align: center; margin-top: 10px; font-size: 0.8rem; color: #666; }
-        .rr-val { color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -131,26 +103,17 @@
             <div class="session-card" id="tokyoCard">
                 <div class="session-icon">🗼</div>
                 <div class="session-name">TOKYO</div>
-                <div class="session-time-box">
-                    <span class="session-status-text" id="tokyoLabel">--</span>
-                    <div class="session-timer" id="tokyoTimer">--:--:--</div>
-                </div>
+                <div class="session-timer" id="tokyoTimer">--:--:--</div>
             </div>
             <div class="session-card" id="londonCard">
                 <div class="session-icon">🏰</div>
                 <div class="session-name">LONDON</div>
-                <div class="session-time-box">
-                    <span class="session-status-text" id="londonLabel">--</span>
-                    <div class="session-timer" id="londonTimer">--:--:--</div>
-                </div>
+                <div class="session-timer" id="londonTimer">--:--:--</div>
             </div>
             <div class="session-card" id="newyorkCard">
                 <div class="session-icon">🗽</div>
                 <div class="session-name">NEW YORK</div>
-                <div class="session-time-box">
-                    <span class="session-status-text" id="newyorkLabel">--</span>
-                    <div class="session-timer" id="newyorkTimer">--:--:--</div>
-                </div>
+                <div class="session-timer" id="newyorkTimer">--:--:--</div>
             </div>
         </div>
 
@@ -168,41 +131,55 @@
 
             <div class="ai-section">
                 <div class="ai-controls">
+                    
+                    <div class="control-group">
+                        <label class="control-label">CURRENT LIVE PRICE (Required for Accuracy)</label>
+                        <div class="price-input-group">
+                            <span>$</span>
+                            <input type="number" id="currentPrice" class="api-input price-input" placeholder="e.g. 2653.50 (Enter manually if needed)" step="0.01">
+                        </div>
+                    </div>
+
                     <div class="control-grid">
-                        <select id="strategy" class="control-select">
-                            <option value="intraday">📊 Intraday (1H/4H)</option>
-                            <option value="scalping">⚡ Scalping (1M/5M)</option>
-                            <option value="swing">📈 Swing (Daily)</option>
-                        </select>
-                        <select id="riskMode" class="control-select">
-                            <option value="normal">⚖️ Normal Risk</option>
-                            <option value="conservative">🛡️ Conservative (Wait for Confirmation)</option>
-                            <option value="aggressive">⚔️ Aggressive (Market Order)</option>
-                        </select>
+                        <div class="control-group">
+                            <label class="control-label">STRATEGY</label>
+                            <select id="strategy" class="control-select">
+                                <option value="intraday">📊 Intraday (1H/4H)</option>
+                                <option value="scalping">⚡ Scalping (1M/5M)</option>
+                                <option value="swing">📈 Swing (Daily)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">RISK MODE</label>
+                            <select id="riskMode" class="control-select">
+                                <option value="normal">⚖️ Normal</option>
+                                <option value="conservative">🛡️ Safe</option>
+                                <option value="aggressive">⚔️ Aggressive</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <input type="password" id="apiKey" class="api-input" placeholder="🔑 Enter OpenRouter API Key (Saved Locally)">
+                    <div class="control-group">
+                        <label class="control-label">API KEY</label>
+                        <input type="password" id="apiKey" class="api-input" placeholder="🔑 OpenRouter API Key">
+                    </div>
                     
                     <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
-                        🚀 ANALYZE CHART
+                        🚀 ANALYZE WITH LIVE PRICE
                     </button>
-                    <div style="text-align:center; margin-top:8px; font-size:0.7rem; color:#666;">
-                        <a href="https://openrouter.ai/keys" target="_blank" style="color:#666;">Get Key</a> • Uses Gemini 2.0 / Llama 3.2
-                    </div>
                 </div>
 
                 <div class="results-area">
                     <div class="loading" id="loading">
                         <div class="spinner"></div>
-                        <p id="loadingText">Initializing Vision Model...</p>
+                        <p id="loadingText">Analyzing Structure...</p>
                     </div>
 
                     <div class="signal-card" id="resultCard">
                         <div class="bias-header">
-                            <div class="bias-sub">BIAS</div>
+                            <div style="font-size: 0.8rem; color: #888;">SIGNAL BIAS</div>
                             <div class="bias-large" id="outBias">--</div>
-                            <div class="order-type"><span class="type-badge" id="outType">--</span></div>
-                            <div style="font-size: 0.8rem; color: #888;">Confidence: <span id="outConf" style="color:#fff;">--</span></div>
+                            <div style="margin-top:5px; font-weight:bold; font-size:0.9rem; color:#ccc;">Confidence: <span id="outConf" style="color:#fff;">--</span></div>
                         </div>
 
                         <div class="trade-plan">
@@ -213,20 +190,20 @@
                             <div class="plan-box sl-box">
                                 <div class="plan-label">STOP LOSS</div>
                                 <div class="plan-val" id="outSL">--</div>
-                                <div class="plan-pips" id="outSLPips">-- pips</div>
+                                <div class="plan-pips" id="outSLPips">--</div>
                             </div>
                             <div class="plan-box tp-box">
                                 <div class="plan-label">TAKE PROFIT</div>
                                 <div class="plan-val" id="outTP">--</div>
-                                <div class="plan-pips" id="outTPPips">-- pips</div>
+                                <div class="plan-pips" id="outTPPips">--</div>
                             </div>
                         </div>
                         
-                        <div class="rr-ratio">Risk/Reward: <span class="rr-val" id="outRR">--</span></div>
-
-                        <div style="margin-top: 15px;">
-                            <div class="analysis-text" id="outReason">--</div>
+                        <div style="text-align:center; font-size:0.8rem; color:#666; margin-bottom:15px;">
+                            Risk/Reward: <span id="outRR" style="color:#fff; font-weight:bold;">--</span>
                         </div>
+
+                        <div class="analysis-text" id="outReason">--</div>
                     </div>
                 </div>
             </div>
@@ -234,145 +211,86 @@
     </div>
 
     <script>
-        // ================= TIMING & MARKET LOGIC =================
+        // ================= TIMING LOGIC =================
         const sessionConfigs = {
-            tokyo: { start: 0, end: 9, name: "Tokyo" },
-            london: { start: 8, end: 17, name: "London" },
-            newyork: { start: 13, end: 22, name: "New York" }
+            tokyo: { start: 0, end: 9 },
+            london: { start: 8, end: 17 },
+            newyork: { start: 13, end: 22 }
         };
 
         function updateMarketStatus() {
             const now = new Date();
-            const day = now.getUTCDay(); // 0=Sun, 6=Sat
+            const day = now.getUTCDay();
             const hour = now.getUTCHours();
             
-            // Market Logic (Simple Global: Closed Sat & Sun until 22:00 UTC)
-            let isMarketClosed = false;
-            let timeToMarketOpen = 0;
-
-            if (day === 6) { // Saturday
-                isMarketClosed = true;
-                const target = new Date(now);
-                target.setUTCDate(now.getUTCDate() + 1);
-                target.setUTCHours(22, 0, 0, 0);
-                timeToMarketOpen = target - now;
-            }
-            else if (day === 0 && hour < 22) { // Sunday before open
-                isMarketClosed = true;
-                const target = new Date(now);
-                target.setUTCHours(22, 0, 0, 0);
-                timeToMarketOpen = target - now;
-            }
-            else if (day === 5 && hour >= 22) { // Friday after close
-                isMarketClosed = true;
-                const target = new Date(now);
-                target.setUTCDate(now.getUTCDate() + 2);
-                target.setUTCHours(22, 0, 0, 0);
-                timeToMarketOpen = target - now;
-            }
+            // Market Closed Check (Sat/Sun)
+            let isClosed = (day === 6) || (day === 0 && hour < 22) || (day === 5 && hour >= 22);
+            let openTime = new Date(now);
+            
+            // Calc time to open
+            if(day === 6) openTime.setUTCDate(now.getUTCDate() + 1);
+            if(day === 5 && hour >= 22) openTime.setUTCDate(now.getUTCDate() + 2);
+            openTime.setUTCHours(22, 0, 0, 0);
 
             const statusEl = document.getElementById('marketStatus');
             const statusText = document.getElementById('marketStatusText');
             
-            if (isMarketClosed) {
+            if (isClosed) {
+                let diff = openTime - now;
                 statusEl.className = 'market-status market-closed';
-                statusText.innerHTML = `CLOSED • OPENS IN ${formatTime(timeToMarketOpen)}`;
+                statusText.innerHTML = `CLOSED • OPENS IN ${formatTime(diff)}`;
             } else {
                 statusEl.className = 'market-status market-open';
                 statusText.textContent = "MARKET OPEN • LIVE";
             }
 
-            // Session Timers
+            // Sessions
             Object.keys(sessionConfigs).forEach(key => {
                 const config = sessionConfigs[key];
                 const card = document.getElementById(key + 'Card');
-                const label = document.getElementById(key + 'Label');
                 const timer = document.getElementById(key + 'Timer');
                 
-                let isOpen = false;
-                let targetTime = new Date(now);
-                let labelText = "";
-                let timerClass = "";
-
-                if (isMarketClosed) {
-                    // Weekend Logic
-                    let daysToAdd = (1 - day + 7) % 7; 
-                    if (daysToAdd === 0 && hour >= config.end) daysToAdd = 7;
-                    if (day === 0) daysToAdd = 1;
-                    if (day === 6) daysToAdd = 2;
-                    if (day === 5) daysToAdd = 3;
-
-                    targetTime.setUTCDate(now.getUTCDate() + daysToAdd);
-                    targetTime.setUTCHours(config.start, 0, 0, 0);
-                    
-                    labelText = "OPENS MONDAY";
-                    timerClass = "timer-waiting";
-                    isOpen = false;
+                let isOpen = !isClosed && (hour >= config.start && hour < config.end);
+                
+                // Simple display logic
+                if(isClosed) {
+                    timer.textContent = "WAITING";
+                    timer.className = "session-timer timer-waiting";
+                    card.classList.remove('active');
+                } else if(isOpen) {
+                    let closeTime = new Date(now);
+                    closeTime.setUTCHours(config.end, 0, 0, 0);
+                    let diff = closeTime - now;
+                    timer.textContent = formatTime(diff);
+                    timer.className = "session-timer timer-open";
+                    card.classList.add('active');
                 } else {
-                    // Weekday Logic
-                    if (hour >= config.start && hour < config.end) {
-                        isOpen = true;
-                        targetTime.setUTCHours(config.end, 0, 0, 0);
-                        labelText = "CLOSES IN";
-                        timerClass = "timer-open";
-                    } else {
-                        isOpen = false;
-                        labelText = "OPENS IN";
-                        timerClass = "timer-closed";
-                        if (hour >= config.end) {
-                            targetTime.setUTCDate(now.getUTCDate() + 1);
-                        }
-                        targetTime.setUTCHours(config.start, 0, 0, 0);
-                    }
+                    timer.textContent = "CLOSED";
+                    timer.className = "session-timer timer-closed";
+                    card.classList.remove('active');
                 }
-
-                let diff = targetTime - now;
-                if(diff < 0) diff = 0;
-
-                card.classList.toggle('active', isOpen);
-                timer.textContent = formatTime(diff);
-                timer.className = 'session-timer ' + timerClass;
-                label.textContent = labelText;
-                label.style.color = isOpen ? '#00ff88' : '#888';
             });
         }
 
         function formatTime(ms) {
-            const seconds = Math.floor((ms / 1000) % 60);
-            const minutes = Math.floor((ms / (1000 * 60)) % 60);
-            const hours = Math.floor((ms / (1000 * 60 * 60)));
-            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+            if(ms < 0) ms = 0;
+            const h = Math.floor(ms / 3600000);
+            const m = Math.floor((ms % 3600000) / 60000);
+            return `${h}h ${m}m`;
         }
-
-        function pad(num) { return num.toString().padStart(2, '0'); }
-
         setInterval(updateMarketStatus, 1000);
         updateMarketStatus();
 
-        // ================= IMAGE HANDLING =================
+        // ================= UPLOAD LOGIC =================
         const dropZone = document.getElementById('dropZone');
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
+        const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*';
         let currentImageBase64 = null;
 
         dropZone.onclick = () => { if(!currentImageBase64) fileInput.click(); };
         fileInput.onchange = e => handleFile(e.target.files[0]);
-        
         dropZone.ondragover = e => { e.preventDefault(); dropZone.style.borderColor = '#00ff88'; };
-        dropZone.ondragleave = () => { dropZone.style.borderColor = '#333'; };
-        dropZone.ondrop = e => { 
-            e.preventDefault(); 
-            dropZone.style.borderColor = '#333';
-            if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-        };
-
-        document.onpaste = e => {
-            const items = e.clipboardData.items;
-            for (let i of items) {
-                if (i.type.indexOf('image') !== -1) handleFile(i.getAsFile());
-            }
-        };
+        dropZone.ondrop = e => { e.preventDefault(); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); };
+        document.onpaste = e => { if(e.clipboardData.items[0].type.includes('image')) handleFile(e.clipboardData.items[0].getAsFile()); };
 
         function handleFile(file) {
             const reader = new FileReader();
@@ -389,7 +307,6 @@
         document.getElementById('clearBtn').onclick = (e) => {
             e.stopPropagation();
             currentImageBase64 = null;
-            document.getElementById('previewImage').src = '';
             document.getElementById('previewImage').classList.remove('show');
             document.getElementById('dropContent').classList.remove('hide');
             document.getElementById('clearBtn').style.display = 'none';
@@ -402,135 +319,106 @@
 
         async function runAnalysis() {
             const key = document.getElementById('apiKey').value.trim();
-            const statusText = document.getElementById('loadingText');
+            const userPrice = document.getElementById('currentPrice').value;
+
+            if(!key) return alert('⚠️ Please enter API Key');
+            if(!currentImageBase64) return alert('⚠️ Please upload a chart');
             
-            if(!key) return alert('⚠️ Error: Please enter your OpenRouter API Key.');
-            if(!currentImageBase64) return alert('⚠️ Error: Please upload a chart image first.');
+            // USER PRICE WARNING
+            let pricePrompt = "";
+            if(userPrice) {
+                pricePrompt = `USER_PROVIDED_CURRENT_PRICE: ${userPrice}. USE THIS EXACT PRICE as the reference anchor. Do not read price from image OCR if it conflicts.`;
+            } else {
+                pricePrompt = `READ THE Y-AXIS (Right Side) carefully for the current price. If you cannot see it clearly, ESTABLISH the price based on visible levels.`;
+            }
 
             localStorage.setItem('or_key', key);
             
-            document.getElementById('analyzeBtn').disabled = true;
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultCard').classList.remove('show');
-            statusText.innerText = "Initializing AI...";
+            document.getElementById('analyzeBtn').disabled = true;
 
             const strategy = document.getElementById('strategy').value;
             const risk = document.getElementById('riskMode').value;
 
             const prompt = `
-            You are an expert Forex Analyst.
-            Analyze this chart for XAU/USD (Gold).
+            You are a Professional Gold Trader.
+            Analyze this XAU/USD chart.
+            
+            CONTEXT:
             Strategy: ${strategy}
             Risk: ${risk}
+            ${pricePrompt}
 
-            Return ONLY valid JSON with this structure:
+            TASK:
+            1. Determine the BIAS (BUY/SELL/WAIT).
+            2. If User provided price ${userPrice}, calculate Entry/SL/TP relative to that.
+            3. If no price provided, read the right-axis carefully.
+            
+            RETURN JSON ONLY:
             {
-                "bias": "BUY" or "SELL" or "WAIT",
-                "confidence": 85,
-                "action_type": "MARKET" or "LIMIT",
-                "current_price": 2050.50,
-                "entry_price": 2050.50,
-                "stop_loss": 2045.00,
-                "take_profit": 2065.00,
-                "reasoning": "Clear support bounce observed."
+                "bias": "BUY" | "SELL" | "WAIT",
+                "confidence": 90,
+                "current_price": number,
+                "entry_price": number,
+                "stop_loss": number,
+                "take_profit": number,
+                "reasoning": "Concise technical reason."
             }
-            Do not add markdown. Just raw JSON.
             `;
 
-            const models = [
-                'google/gemini-2.0-flash-exp:free',
-                'meta-llama/llama-3.2-11b-vision-instruct:free',
-                'google/gemini-flash-1.5'
-            ];
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "google/gemini-2.0-flash-exp:free", // Best for vision currently
+                        messages: [{
+                            role: "user",
+                            content: [
+                                { type: "text", text: prompt },
+                                { type: "image_url", image_url: { url: currentImageBase64 } }
+                            ]
+                        }],
+                        response_format: { type: "json_object" }
+                    })
+                });
 
-            let result = null;
-            let lastError = "";
+                if(!response.ok) throw new Error("API Connection Failed");
+                
+                const data = await response.json();
+                let content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
+                const result = JSON.parse(content);
 
-            for (const model of models) {
-                if (result) break;
-                try {
-                    statusText.innerText = `Trying model: ${model.split('/')[1]}...`;
-                    
-                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${key}`,
-                            "Content-Type": "application/json",
-                            "HTTP-Referer": window.location.href,
-                            "X-Title": "Gold AI Analyst"
-                        },
-                        body: JSON.stringify({
-                            "model": model,
-                            "messages": [
-                                {
-                                    "role": "user",
-                                    "content": [
-                                        { "type": "text", "text": prompt },
-                                        { "type": "image_url", "image_url": { "url": currentImageBase64 } }
-                                    ]
-                                }
-                            ],
-                            "response_format": { "type": "json_object" } 
-                        })
-                    });
+                displayResults(result, userPrice);
 
-                    if (!response.ok) {
-                        const errData = await response.json().catch(() => ({}));
-                        throw new Error(`API Error (${response.status}): ${errData.error?.message || response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    if(!data.choices || !data.choices[0] || !data.choices[0].message.content) {
-                        throw new Error("Empty response from AI");
-                    }
-
-                    let content = data.choices[0].message.content;
-                    content = content.replace(/```json/g, '').replace(/```/g, '').trim();
-                    result = JSON.parse(content);
-
-                } catch (e) {
-                    console.error(`${model} failed:`, e);
-                    lastError = e.message;
-                }
+            } catch (e) {
+                alert("Analysis Error: " + e.message + "\n\nTry entering the Current Price manually!");
             }
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = false;
-
-            if(result) {
-                displayResults(result);
-            } else {
-                alert(`❌ ANALYSIS FAILED\n\nReason: ${lastError}\n\nTroubleshooting:\n1. Check API Key.\n2. Check Image format.\n3. Check internet connection.`);
-            }
         }
 
-        function displayResults(data) {
+        function displayResults(data, userOverride) {
             const card = document.getElementById('resultCard');
             
+            // Bias
             const biasEl = document.getElementById('outBias');
             biasEl.innerText = data.bias;
             biasEl.className = 'bias-large bias-' + data.bias.toLowerCase();
-
-            const typeEl = document.getElementById('outType');
-            let actionType = data.action_type || 'MARKET';
-            
-            if (data.current_price && data.entry_price) {
-                const diff = Math.abs(data.current_price - data.entry_price);
-                if (diff > 2.0 && data.bias !== 'WAIT') {
-                    actionType = 'LIMIT'; 
-                }
-            }
-            if (data.bias === 'WAIT') actionType = 'WAITING';
-
-            typeEl.innerText = actionType;
-            typeEl.className = 'type-badge ' + actionType.toLowerCase();
-
             document.getElementById('outConf').innerText = data.confidence + '%';
-            document.getElementById('outEntry').innerText = data.entry_price || '--';
-            document.getElementById('outSL').innerText = data.stop_loss || '--';
-            document.getElementById('outTP').innerText = data.take_profit || '--';
+
+            // Prices
+            // If user provided a price, ensure we display something close to it if AI hallucinated wildly
+            let current = parseFloat(userOverride) || data.current_price;
+            
+            document.getElementById('outEntry').innerText = data.entry_price || current;
+            document.getElementById('outSL').innerText = data.stop_loss || '0.00';
+            document.getElementById('outTP').innerText = data.take_profit || '0.00';
             document.getElementById('outReason').innerText = data.reasoning;
 
+            // Pips & RR
             if(data.entry_price && data.stop_loss) {
                 const slPips = Math.abs(data.entry_price - data.stop_loss) * 10;
                 document.getElementById('outSLPips').innerText = slPips.toFixed(1) + ' pips';
@@ -538,10 +426,8 @@
                 if(data.take_profit) {
                     const tpPips = Math.abs(data.take_profit - data.entry_price) * 10;
                     document.getElementById('outTPPips').innerText = tpPips.toFixed(1) + ' pips';
-                    
                     const rr = tpPips / slPips;
                     document.getElementById('outRR').innerText = "1:" + rr.toFixed(2);
-                    document.getElementById('outRR').style.color = rr > 1.5 ? '#00ff88' : '#ffd700';
                 }
             }
 
