@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Pro Analyst (v7.0 - Future Proof)</title>
+    <title>XAU/USD Pro Analyst (v8.0)</title>
     <style>
         /* ================= STYLES ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0a0a12; min-height: 100vh; color: #e0e0e0; }
-        
         .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
 
         /* Header */
@@ -51,6 +50,13 @@
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .control-select, .api-input { width: 100%; background: #0a0a12; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
         .control-select:focus, .api-input:focus { border-color: #ffd700; }
+
+        /* Model Input - HIGHLIGHTED */
+        .model-input { 
+            border: 1px solid #00ff88; 
+            background: rgba(0, 255, 136, 0.05); 
+            color: #fff;
+        }
 
         /* Price Input */
         .price-input-group { position: relative; }
@@ -96,18 +102,13 @@
 
         .copy-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; margin: 0 auto; transition: 0.2s; }
         .copy-btn:hover { background: #444; border-color: #777; }
-
-        .custom-model-input { display:none; margin-top:10px; border-color: #666; }
-        .custom-model-input.show { display: block; }
-        .tip-text { font-size: 0.7rem; color: #666; margin-top: 5px; }
-
     </style>
 </head>
 <body>
 
     <div class="container">
         <header class="header">
-            <h1>🥇 XAU/USD Pro Analyst v7</h1>
+            <h1>🥇 XAU/USD Pro Analyst v8</h1>
             <div id="marketStatus" class="market-status market-closed">
                 <span class="pulse-dot"></span>
                 <span id="marketStatusText">CHECKING...</span>
@@ -115,18 +116,9 @@
         </header>
 
         <div class="sessions-grid">
-            <div class="session-card" id="tokyoCard">
-                <div class="session-name">TOKYO</div>
-                <div class="session-timer" id="tokyoTimer">--:--:--</div>
-            </div>
-            <div class="session-card" id="londonCard">
-                <div class="session-name">LONDON</div>
-                <div class="session-timer" id="londonTimer">--:--:--</div>
-            </div>
-            <div class="session-card" id="newyorkCard">
-                <div class="session-name">NEW YORK</div>
-                <div class="session-timer" id="newyorkTimer">--:--:--</div>
-            </div>
+            <div class="session-card" id="tokyoCard"><div class="session-name">TOKYO</div><div class="session-timer" id="tokyoTimer">--:--:--</div></div>
+            <div class="session-card" id="londonCard"><div class="session-name">LONDON</div><div class="session-timer" id="londonTimer">--:--:--</div></div>
+            <div class="session-card" id="newyorkCard"><div class="session-name">NEW YORK</div><div class="session-timer" id="newyorkTimer">--:--:--</div></div>
         </div>
 
         <div class="main-grid">
@@ -145,7 +137,13 @@
                 <div class="ai-controls">
                     
                     <div class="control-group">
-                        <label class="control-label">CURRENT LIVE PRICE (Required)</label>
+                        <label class="control-label" style="color:#00ff88;">AI MODEL ID (PASTE HERE)</label>
+                        <input type="text" id="modelId" class="api-input model-input" value="google/gemini-flash-1.5-8b" placeholder="Paste ID (e.g. google/gemini-2.0-flash-exp:free)">
+                        <div style="font-size:0.7rem; color:#666; margin-top:4px;">Default is a stable free model. If it fails, paste new ID.</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">CURRENT LIVE PRICE</label>
                         <div class="price-input-group">
                             <span>$</span>
                             <input type="number" id="currentPrice" class="api-input price-input" placeholder="e.g. 2653.50" step="0.01">
@@ -154,18 +152,6 @@
 
                     <div class="control-grid">
                         <div class="control-group">
-                            <label class="control-label">AI MODEL</label>
-                            <select id="aiModel" class="control-select" onchange="toggleCustomModel()">
-                                <option value="auto">✨ Auto (Smart Retry)</option>
-                                <option value="google/gemini-2.0-flash-exp:free">🚀 Gemini 2.0 Flash (Free)</option>
-                                <option value="meta-llama/llama-3.2-11b-vision-instruct:free">🦙 Llama 3.2 Vision (Free)</option>
-                                <option value="google/gemini-flash-1.5-8b">⚡ Gemini 1.5 Flash 8B (Low Cost)</option>
-                                <option value="custom">🛠️ Custom Model ID</option>
-                            </select>
-                            <input type="text" id="customModelId" class="api-input custom-model-input" placeholder="Paste Model ID (e.g. google/gemini-pro-1.5)">
-                            <div class="tip-text" id="modelTip">If you get 404, select "Custom" and paste a new ID from openrouter.ai/models</div>
-                        </div>
-                        <div class="control-group">
                             <label class="control-label">STRATEGY</label>
                             <select id="strategy" class="control-select">
                                 <option value="intraday">📊 Intraday</option>
@@ -173,11 +159,10 @@
                                 <option value="swing">📈 Swing</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label class="control-label">API KEY (OpenRouter)</label>
-                        <input type="password" id="apiKey" class="api-input" placeholder="sk-or-...">
+                         <div class="control-group">
+                            <label class="control-label">API KEY</label>
+                            <input type="password" id="apiKey" class="api-input" placeholder="sk-or-...">
+                        </div>
                     </div>
                     
                     <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
@@ -214,27 +199,16 @@
                         </div>
                         
                         <div class="analysis-text" id="outReason">--</div>
-
                         <button class="copy-btn" onclick="copySignal()">📋 Copy Signal</button>
 
                         <div class="calculator-box">
                             <div class="calc-title">💰 Position Size Calculator</div>
                             <div class="calc-row">
-                                <div>
-                                    <label class="lot-label">Balance ($)</label><br>
-                                    <input type="number" id="calcBalance" class="calc-input" value="1000" oninput="calculateLots()">
-                                </div>
-                                <div>
-                                    <label class="lot-label">Risk (%)</label><br>
-                                    <input type="number" id="calcRisk" class="calc-input" value="1" step="0.5" oninput="calculateLots()">
-                                </div>
-                                <div class="calc-result">
-                                    <div class="lot-size" id="calcLots">0.00</div>
-                                    <div class="lot-label">Std Lots</div>
-                                </div>
+                                <div><label class="lot-label">Balance</label><input type="number" id="calcBalance" class="calc-input" value="1000" oninput="calculateLots()"></div>
+                                <div><label class="lot-label">Risk %</label><input type="number" id="calcRisk" class="calc-input" value="1" step="0.5" oninput="calculateLots()"></div>
+                                <div class="calc-result"><div class="lot-size" id="calcLots">0.00</div><div class="lot-label">Lots</div></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -242,95 +216,33 @@
     </div>
 
     <script>
-        // ================= UI LOGIC =================
-        function toggleCustomModel() {
-            const select = document.getElementById('aiModel');
-            const customInput = document.getElementById('customModelId');
-            if(select.value === 'custom') {
-                customInput.classList.add('show');
-                customInput.focus();
-            } else {
-                customInput.classList.remove('show');
-            }
-        }
-
-        // ================= TIMING LOGIC =================
-        const sessionConfigs = {
-            tokyo: { start: 0, end: 9 },
-            london: { start: 8, end: 17 },
-            newyork: { start: 13, end: 22 }
-        };
-
+        // ================= TIMING =================
+        const sessionConfigs = { tokyo: {s:0,e:9}, london: {s:8,e:17}, newyork: {s:13,e:22} };
         function updateMarketStatus() {
-            const now = new Date();
-            const day = now.getUTCDay();
-            const hour = now.getUTCHours();
+            const now = new Date(); const d=now.getUTCDay(), h=now.getUTCHours();
+            let closed = (d===6)||(d===0&&h<22)||(d===5&&h>=22);
             
-            let isClosed = (day === 6) || (day === 0 && hour < 22) || (day === 5 && hour >= 22);
-            let openTime = new Date(now);
-            
-            if(day === 6) openTime.setUTCDate(now.getUTCDate() + 1);
-            if(day === 5 && hour >= 22) openTime.setUTCDate(now.getUTCDate() + 2);
-            openTime.setUTCHours(22, 0, 0, 0);
+            const st = document.getElementById('marketStatusText');
+            document.getElementById('marketStatus').className = closed ? 'market-status market-closed' : 'market-status market-open';
+            st.innerHTML = closed ? 'MARKET CLOSED' : 'MARKET OPEN';
 
-            const statusEl = document.getElementById('marketStatus');
-            const statusText = document.getElementById('marketStatusText');
-            
-            if (isClosed) {
-                let diff = openTime - now;
-                statusEl.className = 'market-status market-closed';
-                statusText.innerHTML = `CLOSED • OPENS IN ${formatTime(diff)}`;
-            } else {
-                statusEl.className = 'market-status market-open';
-                statusText.textContent = "MARKET OPEN • LIVE";
-            }
-
-            Object.keys(sessionConfigs).forEach(key => {
-                const config = sessionConfigs[key];
-                const card = document.getElementById(key + 'Card');
-                const timer = document.getElementById(key + 'Timer');
-                
-                let isOpen = !isClosed && (hour >= config.start && hour < config.end);
-                
-                if(isClosed) {
-                    timer.textContent = "WAITING";
-                    timer.className = "session-timer timer-waiting";
-                    card.classList.remove('active');
-                } else if(isOpen) {
-                    let closeTime = new Date(now);
-                    closeTime.setUTCHours(config.end, 0, 0, 0);
-                    let diff = closeTime - now;
-                    timer.textContent = formatTime(diff);
-                    timer.className = "session-timer timer-open";
-                    card.classList.add('active');
-                } else {
-                    timer.textContent = "CLOSED";
-                    timer.className = "session-timer timer-closed";
-                    card.classList.remove('active');
-                }
+            Object.keys(sessionConfigs).forEach(k => {
+                const s = sessionConfigs[k];
+                const active = !closed && (h>=s.s && h<s.e);
+                document.getElementById(k+'Card').style.borderColor = active ? '#00ff88' : 'rgba(255,255,255,0.05)';
+                document.getElementById(k+'Timer').innerText = active ? 'OPEN' : 'CLOSED';
+                document.getElementById(k+'Timer').className = active ? 'session-timer timer-open' : 'session-timer timer-closed';
             });
         }
+        setInterval(updateMarketStatus, 1000); updateMarketStatus();
 
-        function formatTime(ms) {
-            if(ms < 0) ms = 0;
-            const h = Math.floor(ms / 3600000);
-            const m = Math.floor((ms % 3600000) / 60000);
-            return `${h}h ${m}m`;
-        }
-        setInterval(updateMarketStatus, 1000);
-        updateMarketStatus();
-
-        // ================= UPLOAD LOGIC =================
+        // ================= IMAGE =================
+        let currentImageBase64 = null;
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*';
-        let currentImageBase64 = null;
-
         dropZone.onclick = () => { if(!currentImageBase64) fileInput.click(); };
         fileInput.onchange = e => handleFile(e.target.files[0]);
-        dropZone.ondragover = e => { e.preventDefault(); dropZone.style.borderColor = '#00ff88'; };
-        dropZone.ondrop = e => { e.preventDefault(); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); };
         document.onpaste = e => { if(e.clipboardData.items[0].type.includes('image')) handleFile(e.clipboardData.items[0].getAsFile()); };
-
         function handleFile(file) {
             const reader = new FileReader();
             reader.onload = e => {
@@ -342,186 +254,114 @@
             };
             reader.readAsDataURL(file);
         }
-
         document.getElementById('clearBtn').onclick = (e) => {
-            e.stopPropagation();
-            currentImageBase64 = null;
+            e.stopPropagation(); currentImageBase64 = null;
             document.getElementById('previewImage').classList.remove('show');
             document.getElementById('dropContent').classList.remove('hide');
             document.getElementById('clearBtn').style.display = 'none';
-            document.getElementById('resultCard').classList.remove('show');
         };
 
-        // ================= ANALYZE ENGINE =================
+        // ================= ANALYZE =================
         const savedKey = localStorage.getItem('or_key');
         if(savedKey) document.getElementById('apiKey').value = savedKey;
-
         let currentAnalysis = { entry: 0, sl: 0 };
 
         async function runAnalysis() {
             const key = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('modelId').value.trim();
             const userPrice = document.getElementById('currentPrice').value;
-            let selectedModel = document.getElementById('aiModel').value;
-            
-            // Handle Custom Model ID
-            if(selectedModel === 'custom') {
-                const customId = document.getElementById('customModelId').value.trim();
-                if(!customId) return alert('⚠️ Please enter a Custom Model ID from openrouter.ai/models');
-                selectedModel = customId;
-            }
 
-            if(!key) return alert('⚠️ Please enter API Key');
-            if(!currentImageBase64) return alert('⚠️ Please upload a chart');
+            if(!key) return alert('⚠️ Enter API Key');
+            if(!model) return alert('⚠️ Enter Model ID');
+            if(!currentImageBase64) return alert('⚠️ Upload Chart');
             
-            let pricePrompt = userPrice 
-                ? `USER_PROVIDED_CURRENT_PRICE: ${userPrice}. USE THIS EXACT PRICE as the anchor.`
-                : `READ THE Y-AXIS (Right Side) carefully for the current price.`;
-
             localStorage.setItem('or_key', key);
             
             document.getElementById('loading').style.display = 'block';
             document.getElementById('resultCard').classList.remove('show');
             document.getElementById('analyzeBtn').disabled = true;
 
-            const strategy = document.getElementById('strategy').value;
-            
-            // Model List Logic
-            let modelsToTry = [];
-            if(selectedModel === 'auto') {
-                modelsToTry = [
-                    'google/gemini-2.0-flash-exp:free',
-                    'meta-llama/llama-3.2-11b-vision-instruct:free',
-                    'google/gemini-flash-1.5-8b', // Highly reliable fallback
-                    'google/gemini-flash-1.5'
-                ];
-            } else {
-                modelsToTry = [selectedModel];
-            }
+            const prompt = `
+            You are a Professional Gold Trader. Analyze this XAU/USD chart.
+            STRATEGY: ${document.getElementById('strategy').value}.
+            ${userPrice ? 'USER PRICE: ' + userPrice : 'READ PRICE FROM CHART'}.
+            TASK: Determine BIAS (BUY/SELL/WAIT) and prices.
+            RETURN JSON ONLY: {"bias":"BUY","confidence":90,"current_price":2000,"entry_price":2000,"stop_loss":1990,"take_profit":2020,"reasoning":"Reason"}
+            `;
 
-            let success = false;
-            let finalError = "";
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${key}`, 
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": window.location.href
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{
+                            role: "user",
+                            content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: currentImageBase64 } }]
+                        }],
+                        response_format: { type: "json_object" }
+                    })
+                });
 
-            for(let i = 0; i < modelsToTry.length; i++) {
-                if(success) break;
-                
-                const model = modelsToTry[i];
-                document.getElementById('loadingText').innerText = `Trying Model: ${model.split('/')[1] || model}...`;
-                console.log("Trying:", model);
-
-                try {
-                    const prompt = `
-                    You are a Professional Gold Trader. Analyze this XAU/USD chart.
-                    STRATEGY: ${strategy}. ${pricePrompt}
-                    TASK: Determine BIAS (BUY/SELL/WAIT) and prices.
-                    RETURN JSON ONLY: {"bias":"BUY","confidence":90,"current_price":2000,"entry_price":2000,"stop_loss":1990,"take_profit":2020,"reasoning":"Technical reason"}
-                    `;
-
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 25000); 
-
-                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                        method: "POST",
-                        headers: { 
-                            "Authorization": `Bearer ${key}`, 
-                            "Content-Type": "application/json",
-                            "HTTP-Referer": window.location.href,
-                            "X-Title": "Gold Analyst"
-                        },
-                        signal: controller.signal,
-                        body: JSON.stringify({
-                            model: model,
-                            messages: [{
-                                role: "user",
-                                content: [
-                                    { type: "text", text: prompt },
-                                    { type: "image_url", image_url: { url: currentImageBase64 } }
-                                ]
-                            }],
-                            response_format: { type: "json_object" }
-                        })
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if(!response.ok) {
-                        const err = await response.json().catch(()=>({}));
-                        // Error 404 = Model Not Found (Name Changed)
-                        throw new Error(`Error ${response.status}: ${err.error?.message || 'Unknown'}`);
-                    }
-                    
-                    const data = await response.json();
-                    if(!data.choices || !data.choices[0]) throw new Error("Empty response");
-
-                    let content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const result = JSON.parse(content);
-                    
-                    displayResults(result, userPrice);
-                    success = true;
-
-                } catch (e) {
-                    console.error(`${model} Failed:`, e.message);
-                    finalError = e.message;
+                if(!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error?.message || response.statusText);
                 }
+                
+                const data = await response.json();
+                let content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
+                const result = JSON.parse(content);
+                
+                displayResults(result, userPrice);
+
+            } catch (e) {
+                alert(`❌ FAILED: ${e.message}\n\nTIP: The Model ID might be wrong. Paste a new one from openrouter.ai/models`);
             }
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = false;
-
-            if(!success) {
-                alert(`❌ FAILED: ${finalError}\n\nSOLUTION:\n1. Open "AI MODEL" dropdown.\n2. Select "Custom Model ID".\n3. Go to openrouter.ai/models, find a working free model.\n4. Paste its ID (e.g. google/gemini-pro-1.5) and try again.`);
-            }
         }
 
         function displayResults(data, userOverride) {
             const card = document.getElementById('resultCard');
-            
-            const biasEl = document.getElementById('outBias');
-            biasEl.innerText = data.bias;
-            biasEl.className = 'bias-large bias-' + data.bias.toLowerCase();
+            document.getElementById('outBias').innerText = data.bias;
+            document.getElementById('outBias').className = 'bias-large bias-' + data.bias.toLowerCase();
             document.getElementById('outConf').innerText = data.confidence + '%';
-
+            
             let current = parseFloat(userOverride) || data.current_price;
-            const entry = data.entry_price || current;
-            const sl = data.stop_loss || 0;
-            const tp = data.take_profit || 0;
+            currentAnalysis = { 
+                bias: data.bias, 
+                entry: data.entry_price || current, 
+                sl: data.stop_loss || 0, 
+                tp: data.take_profit || 0, 
+                reason: data.reasoning 
+            };
 
-            currentAnalysis = { bias: data.bias, entry: entry, sl: sl, tp: tp, reason: data.reasoning };
-
-            document.getElementById('outEntry').innerText = entry;
-            document.getElementById('outSL').innerText = sl || '--';
-            document.getElementById('outTP').innerText = tp || '--';
-            document.getElementById('outReason').innerText = data.reasoning;
+            document.getElementById('outEntry').innerText = currentAnalysis.entry;
+            document.getElementById('outSL').innerText = currentAnalysis.sl;
+            document.getElementById('outTP').innerText = currentAnalysis.tp;
+            document.getElementById('outReason').innerText = currentAnalysis.reason;
 
             calculateLots();
             card.classList.add('show');
             card.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ================= CALCULATOR & UTILS =================
         function calculateLots() {
-            if(!currentAnalysis.entry || !currentAnalysis.sl || currentAnalysis.sl === 0) return;
-
-            const balance = parseFloat(document.getElementById('calcBalance').value);
-            const riskPerc = parseFloat(document.getElementById('calcRisk').value);
-            
-            const riskAmount = balance * (riskPerc / 100);
-            const distance = Math.abs(currentAnalysis.entry - currentAnalysis.sl);
-
-            if(distance <= 0) return;
-
-            const lots = riskAmount / (distance * 100);
-            document.getElementById('calcLots').innerText = lots.toFixed(2);
+            if(!currentAnalysis.entry || !currentAnalysis.sl) return;
+            const bal = parseFloat(document.getElementById('calcBalance').value);
+            const risk = parseFloat(document.getElementById('calcRisk').value);
+            const dist = Math.abs(currentAnalysis.entry - currentAnalysis.sl);
+            if(dist > 0) document.getElementById('calcLots').innerText = ((bal * (risk/100)) / (dist * 100)).toFixed(2);
         }
 
         function copySignal() {
-            if(!currentAnalysis.entry) return;
-            const text = `⚠️ XAU/USD SIGNAL\nBias: ${currentAnalysis.bias}\nEntry: ${currentAnalysis.entry}\nSL: ${currentAnalysis.sl}\nTP: ${currentAnalysis.tp}\nReason: ${currentAnalysis.reason}`;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = "✅ Copied!";
-                setTimeout(() => btn.innerHTML = originalText, 2000);
-            });
+            const text = `⚠️ XAU/USD SIGNAL\nBias: ${currentAnalysis.bias}\nEntry: ${currentAnalysis.entry}\nSL: ${currentAnalysis.sl}\nTP: ${currentAnalysis.tp}`;
+            navigator.clipboard.writeText(text);
         }
     </script>
 </body>
