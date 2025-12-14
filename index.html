@@ -3,646 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD AI Chart Vision Analysis</title>
+    <title>XAU/USD Pro AI Analyst</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a12;
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px;
-        }
+        /* ================= STYLES (UNCHANGED & IMPROVED) ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #0a0a12; min-height: 100vh; color: #e0e0e0; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
 
         /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(255, 215, 0, 0.05);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
-        }
-
-        .header h1 {
-            font-size: 1.4rem;
-            color: #ffd700;
-        }
-
-        .live-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .live-dot {
-            width: 10px;
-            height: 10px;
-            background: #00ff88;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255, 215, 0, 0.05); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255, 215, 0, 0.15); }
+        .header h1 { font-size: 1.4rem; color: #ffd700; display: flex; align-items: center; gap: 10px; }
+        .live-badge { display: flex; align-items: center; gap: 6px; background: rgba(0, 255, 136, 0.1); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(0, 255, 136, 0.2); }
+        .live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(0, 255, 136, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); } }
 
         /* Sessions */
-        .sessions-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .session-card {
-            background: linear-gradient(145deg, #151520, #1a1a28);
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-        }
-
-        .session-card.active {
-            border-color: rgba(0, 255, 136, 0.4);
-        }
-
-        .session-card.active::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: #00ff88;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .session-icon { font-size: 1.2rem; }
-        .session-name { font-size: 0.8rem; font-weight: 600; margin: 4px 0; }
-        .session-card:nth-child(1) .session-name { color: #ff6b9d; }
-        .session-card:nth-child(2) .session-name { color: #4a9eff; }
-        .session-card:nth-child(3) .session-name { color: #ffd700; }
-
-        .session-status {
-            font-size: 0.6rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-        .session-status.active { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
-        .session-status.inactive { background: rgba(255, 255, 255, 0.1); color: #666; }
-
-        .session-timer {
-            font-size: 0.85rem;
-            font-weight: bold;
-            font-family: monospace;
-            margin-top: 4px;
-        }
+        .sessions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .session-card { background: #13131f; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); position: relative; overflow: hidden; }
+        .session-card.active { border-color: #00ff88; background: linear-gradient(145deg, #13131f, #1a2a20); }
+        .session-icon { font-size: 1.2rem; margin-bottom: 5px; }
+        .session-name { font-size: 0.8rem; font-weight: 700; color: #fff; }
+        .session-timer { font-size: 0.8rem; font-family: monospace; color: #888; margin-top: 5px; }
         .session-card.active .session-timer { color: #00ff88; }
-        .session-card.inactive .session-timer { color: #ffd700; }
-        .timer-label { font-size: 0.55rem; color: #555; }
 
-        /* Main Layout */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        /* Main Grid */
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
-        /* Upload Section */
-        .upload-section {
-            background: #12121a;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            padding: 20px;
-        }
+        /* Upload */
+        .upload-section { background: #13131f; border-radius: 16px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .drop-zone { border: 2px dashed #333; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2); min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .drop-zone:hover { border-color: #ffd700; background: rgba(255, 215, 0, 0.02); }
+        .drop-zone.has-image { padding: 10px; border: 2px solid #444; }
+        .preview-image { max-width: 100%; max-height: 400px; border-radius: 8px; display: none; }
+        .preview-image.show { display: block; }
+        .drop-content { pointer-events: none; }
+        .drop-content.hide { display: none; }
 
-        .upload-title {
-            color: #ffd700;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-        }
+        /* Controls */
+        .ai-section { background: #13131f; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; overflow: hidden; }
+        .ai-controls { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .control-select { background: #0a0a12; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; outline: none; }
+        .api-input { width: 100%; background: #0a0a12; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        
+        .analyze-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, #ffd700, #ffaa00); border: none; border-radius: 8px; color: #000; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); }
+        .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* Drop Zone */
-        .drop-zone {
-            border: 2px dashed rgba(255, 215, 0, 0.4);
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255, 215, 0, 0.02);
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .drop-zone:hover {
-            border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.05);
-        }
-
-        .drop-zone.drag-over {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-
-        .drop-zone.has-image { padding: 10px; }
-        .drop-icon { font-size: 3rem; margin-bottom: 15px; }
-        .drop-text { color: #888; font-size: 0.95rem; margin-bottom: 10px; }
-        .drop-subtext { color: #555; font-size: 0.75rem; }
-        .file-input { display: none; }
-
-        /* Preview */
-        .preview-container { width: 100%; display: none; }
-        .preview-container.show { display: block; }
-
-        .preview-image {
-            width: 100%;
-            max-height: 400px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-
-        .preview-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            justify-content: center;
-        }
-
-        .preview-btn {
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            border: none;
-        }
-
-        .preview-btn.remove {
-            background: rgba(255, 71, 87, 0.2);
-            color: #ff4757;
-            border: 1px solid rgba(255, 71, 87, 0.3);
-        }
-
-        /* Paste Info */
-        .paste-info {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .paste-info-text { color: #a78bfa; font-size: 0.8rem; }
-
-        .paste-shortcut {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3px 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: #fff;
-        }
-
-        /* AI Section */
-        .ai-section {
-            background: #12121a;
-            border-radius: 15px;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .ai-header {
-            padding: 15px 20px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.1));
-            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-        }
-
-        .ai-header h2 {
-            color: #a78bfa;
-            font-size: 1rem;
-            margin-bottom: 15px;
-        }
-
-        /* Settings */
-        .settings-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .setting-item label {
-            display: block;
-            font-size: 0.65rem;
-            color: #666;
-            margin-bottom: 4px;
-        }
-
-        .setting-select {
-            width: 100%;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.8rem;
-        }
-
-        /* API Input */
-        .api-section { margin-bottom: 12px; }
-
-        .api-input {
-            width: 100%;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-        }
-
-        .api-link {
-            color: #667eea;
-            font-size: 0.7rem;
-            text-decoration: none;
-        }
-
-        .api-note {
-            color: #00ff88;
-            font-size: 0.65rem;
-            margin-top: 5px;
-        }
-
-        /* Button */
-        .ai-button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .ai-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .ai-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        /* Results */
+        .results-area { padding: 20px; flex: 1; overflow-y: auto; }
+        .loading { display: none; text-align: center; color: #ffd700; padding: 20px; }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,215,0,0.3); border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* AI Content */
-        .ai-content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-            max-height: 500px;
-        }
+        .signal-card { display: none; animation: fadeIn 0.5s; }
+        .signal-card.show { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .ai-placeholder {
-            text-align: center;
-            padding: 40px 20px;
-            color: #555;
-        }
+        /* Bias Header */
+        .bias-header { text-align: center; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .bias-large { font-size: 2.5rem; font-weight: 900; margin: 5px 0; letter-spacing: 1px; }
+        .bias-sub { font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .bias-buy { color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+        .bias-sell { color: #ff4757; text-shadow: 0 0 20px rgba(255, 71, 87, 0.3); }
+        .bias-wait { color: #888; }
+        .bias-neutral { color: #ffd700; }
 
-        .ai-placeholder-icon { font-size: 3rem; margin-bottom: 15px; }
-        .ai-placeholder-text { font-size: 0.9rem; color: #666; line-height: 1.6; }
+        /* Trade Plan */
+        .trade-plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .plan-box { background: rgba(0,0,0,0.3); padding: 15px 10px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .plan-label { font-size: 0.7rem; color: #888; margin-bottom: 5px; font-weight: 700; }
+        .plan-val { font-size: 1.1rem; font-weight: 700; color: #fff; }
+        .plan-pips { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
 
-        /* Result */
-        .ai-result { display: none; }
-        .ai-result.show { display: block; }
+        .entry-box { border-color: rgba(100, 100, 255, 0.3); }
+        .entry-box .plan-val { color: #8da2fb; }
+        
+        .sl-box { border-color: rgba(255, 71, 87, 0.3); }
+        .sl-box .plan-val { color: #ff4757; }
 
-        .signal-box {
-            text-align: center;
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
+        .tp-box { border-color: rgba(0, 255, 136, 0.3); }
+        .tp-box .plan-val { color: #00ff88; }
 
-        .signal-badges {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
+        /* Type Badge */
+        .order-type { text-align: center; margin-bottom: 15px; }
+        .type-badge { padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; background: #333; color: #ccc; }
+        .type-badge.market { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); }
+        .type-badge.limit { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
 
-        .badge {
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
+        /* Analysis Text */
+        .analysis-text { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; color: #ccc; white-space: pre-wrap; border-left: 3px solid #666; }
 
-        .badge.gold { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-        .badge.purple { background: rgba(102, 126, 234, 0.2); color: #a78bfa; }
-        .badge.green { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .rr-ratio { text-align: center; margin-top: 10px; font-size: 0.8rem; color: #666; }
+        .rr-val { color: #fff; font-weight: bold; }
 
-        .signal-bias {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .signal-bias.strong-buy { color: #00ff88; }
-        .signal-bias.buy { color: #7dffb3; }
-        .signal-bias.neutral-buy { color: #b8ffda; }
-        .signal-bias.neutral { color: #ffd700; }
-        .signal-bias.neutral-sell { color: #ffb3b3; }
-        .signal-bias.sell { color: #ff7a7a; }
-        .signal-bias.strong-sell { color: #ff4757; }
-
-        .confidence-row { margin-top: 10px; }
-        .confidence-label { font-size: 0.75rem; color: #888; margin-bottom: 5px; }
-
-        .confidence-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .confidence-fill { height: 100%; border-radius: 4px; }
-        .confidence-fill.high { background: linear-gradient(90deg, #00ff88, #00cc6a); }
-        .confidence-fill.medium { background: linear-gradient(90deg, #ffd700, #ffaa00); }
-        .confidence-fill.low { background: linear-gradient(90deg, #ff4757, #ff6b7a); }
-
-        /* Levels */
-        .levels-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .level-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px 10px;
-            text-align: center;
-        }
-
-        .level-card.entry { border: 1px solid rgba(102, 126, 234, 0.4); }
-        .level-card.sl { border: 1px solid rgba(255, 71, 87, 0.4); }
-        .level-card.tp { border: 1px solid rgba(0, 255, 136, 0.4); }
-
-        .level-label { font-size: 0.65rem; color: #666; margin-bottom: 5px; }
-        .level-value { font-size: 1.2rem; font-weight: bold; }
-
-        .level-card.entry .level-value { color: #a78bfa; }
-        .level-card.sl .level-value { color: #ff4757; }
-        .level-card.tp .level-value { color: #00ff88; }
-
-        .level-pips { font-size: 0.6rem; color: #555; margin-top: 3px; }
-
-        /* Analysis */
-        .analysis-box {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            border-left: 3px solid #667eea;
-        }
-
-        .analysis-title { color: #a78bfa; font-size: 0.8rem; margin-bottom: 10px; font-weight: 600; }
-        .analysis-text { color: #ccc; font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; }
-
-        .timestamp { text-align: center; font-size: 0.65rem; color: #444; margin-top: 15px; }
-
-        /* Error */
-        .error-box {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 12px;
-            text-align: center;
-            display: none;
-        }
-
-        .error-box.show { display: block; }
-        .error-box p { color: #ff6b7a; font-size: 0.85rem; }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .sessions-grid { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-
-        <!-- Header -->
         <header class="header">
-            <h1>🥇 XAU/USD AI Vision</h1>
+            <h1>🥇 XAU/USD Precision AI</h1>
             <div class="live-badge">
                 <span class="live-dot"></span>
-                <span style="color: #00ff88; font-size: 0.85rem;">LIVE</span>
+                <span style="font-size: 0.8rem; color: #00ff88; font-weight: bold;">SYSTEM READY</span>
             </div>
         </header>
 
-        <!-- Sessions -->
         <div class="sessions-grid">
             <div class="session-card" id="tokyoCard">
                 <div class="session-icon">🗼</div>
-                <div class="session-name">Tokyo</div>
-                <div class="session-status" id="tokyoStatus">--</div>
+                <div class="session-name">TOKYO</div>
                 <div class="session-timer" id="tokyoTimer">--</div>
-                <div class="timer-label" id="tokyoLabel">--</div>
             </div>
             <div class="session-card" id="londonCard">
                 <div class="session-icon">🏰</div>
-                <div class="session-name">London</div>
-                <div class="session-status" id="londonStatus">--</div>
+                <div class="session-name">LONDON</div>
                 <div class="session-timer" id="londonTimer">--</div>
-                <div class="timer-label" id="londonLabel">--</div>
             </div>
             <div class="session-card" id="newyorkCard">
                 <div class="session-icon">🗽</div>
-                <div class="session-name">New York</div>
-                <div class="session-status" id="newyorkStatus">--</div>
+                <div class="session-name">NEW YORK</div>
                 <div class="session-timer" id="newyorkTimer">--</div>
-                <div class="timer-label" id="newyorkLabel">--</div>
             </div>
         </div>
 
-        <!-- Main Grid -->
         <div class="main-grid">
-
-            <!-- Upload Section -->
             <div class="upload-section">
-                <h2 class="upload-title">📸 Upload Chart Screenshot</h2>
-                
                 <div class="drop-zone" id="dropZone">
-                    <div id="dropContent">
-                        <div class="drop-icon">📊</div>
-                        <div class="drop-text">Drop chart image or click to upload</div>
-                        <div class="drop-subtext">PNG, JPG, JPEG, WebP</div>
+                    <div class="drop-content" id="dropContent">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">📸</div>
+                        <p style="color: #888;">Paste (Ctrl+V) or Drop Chart Here</p>
                     </div>
-                    <div class="preview-container" id="previewContainer">
-                        <img class="preview-image" id="previewImage" alt="Chart">
-                        <div class="preview-actions">
-                            <button class="preview-btn remove" onclick="removeImage()">🗑️ Remove</button>
-                        </div>
-                    </div>
-                </div>
-                <input type="file" class="file-input" id="fileInput" accept="image/*">
-
-                <div class="paste-info">
-                    <div class="paste-info-text">
-                        💡 Press <span class="paste-shortcut">Ctrl+V</span> to paste screenshot!
-                    </div>
+                    <img id="previewImage" class="preview-image" alt="Chart Preview">
+                    <button id="clearBtn" style="display:none; margin-top:15px; padding:5px 15px; background: #ff4757; border:none; border-radius:4px; color:white; cursor:pointer;">Remove</button>
                 </div>
             </div>
 
-            <!-- AI Section -->
             <div class="ai-section">
-                <div class="ai-header">
-                    <h2>🤖 AI Vision Analysis</h2>
-
-                    <div class="settings-row">
-                        <div class="setting-item">
-                            <label>Strategy</label>
-                            <select class="setting-select" id="strategySelect">
-                                <option value="scalping">⚡ Scalping</option>
-                                <option value="intraday" selected>📊 Intraday</option>
-                                <option value="swing">📈 Swing</option>
-                                <option value="smc">🎯 SMC/ICT</option>
-                            </select>
-                        </div>
-                        <div class="setting-item">
-                            <label>Timeframe</label>
-                            <select class="setting-select" id="timeframeSelect">
-                                <option value="1m">1M</option>
-                                <option value="5m">5M</option>
-                                <option value="15m" selected>15M</option>
-                                <option value="30m">30M</option>
-                                <option value="1h">1H</option>
-                                <option value="4h">4H</option>
-                                <option value="1d">1D</option>
-                            </select>
-                        </div>
+                <div class="ai-controls">
+                    <div class="control-grid">
+                        <select id="strategy" class="control-select">
+                            <option value="intraday">📊 Intraday (1H/4H)</option>
+                            <option value="scalping">⚡ Scalping (1M/5M)</option>
+                            <option value="swing">📈 Swing (Daily)</option>
+                        </select>
+                        <select id="riskMode" class="control-select">
+                            <option value="normal">⚖️ Normal Risk</option>
+                            <option value="conservative">🛡️ Conservative (Wait for Confirmation)</option>
+                            <option value="aggressive">⚔️ Aggressive (Market Order)</option>
+                        </select>
                     </div>
-
-                    <div class="api-section">
-                        <input type="password" class="api-input" id="apiInput" placeholder="🔑 OpenRouter API Key">
-                        <a href="https://openrouter.ai/keys" target="_blank" class="api-link">Get FREE OpenRouter API Key →</a>
-                        <div class="api-note">✅ OpenRouter has FREE vision models!</div>
-                    </div>
-
-                    <button class="ai-button" id="analyzeBtn" onclick="analyzeChart()">
-                        🔍 Analyze Chart
+                    
+                    <input type="password" id="apiKey" class="api-input" placeholder="🔑 Enter OpenRouter API Key (Saved Locally)">
+                    
+                    <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+                        🚀 ANALYZE CHART
                     </button>
-
-                    <div class="error-box" id="errorBox">
-                        <p id="errorText"></p>
+                    <div style="text-align:center; margin-top:8px; font-size:0.7rem; color:#666;">
+                        <a href="https://openrouter.ai/keys" target="_blank" style="color:#666;">Get Key</a> • Uses Gemini 2.0 / Llama 3.2
                     </div>
                 </div>
 
-                <div class="ai-content">
-                    <div class="ai-placeholder" id="placeholder">
-                        <div class="ai-placeholder-icon">👁️</div>
-                        <div class="ai-placeholder-text">
-                            1. Screenshot your chart<br>
-                            2. Upload or Ctrl+V paste<br>
-                            3. AI sees all indicators!
-                        </div>
+                <div class="results-area">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p id="loadingText">Initializing Vision Model...</p>
                     </div>
 
-                    <div class="ai-result" id="result">
-                        <div class="signal-box">
-                            <div class="signal-badges">
-                                <span class="badge gold">XAUUSD</span>
-                                <span class="badge purple" id="badgeStrategy">INTRADAY</span>
-                                <span class="badge green" id="badgeTF">15M</span>
-                            </div>
-                            <div class="signal-bias" id="resultBias">--</div>
-                            <div class="confidence-row">
-                                <div class="confidence-label">Confidence: <span id="confidenceValue">--</span></div>
-                                <div class="confidence-bar">
-                                    <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
-                                </div>
-                            </div>
+                    <div class="signal-card" id="resultCard">
+                        <div class="bias-header">
+                            <div class="bias-sub">BIAS</div>
+                            <div class="bias-large" id="outBias">--</div>
+                            <div class="order-type"><span class="type-badge" id="outType">--</span></div>
+                            <div style="font-size: 0.8rem; color: #888;">Confidence: <span id="outConf" style="color:#fff;">--</span></div>
                         </div>
 
-                        <div class="levels-grid">
-                            <div class="level-card entry">
-                                <div class="level-label">ENTRY</div>
-                                <div class="level-value" id="resultEntry">--</div>
-                                <div class="level-pips" id="entryPips">--</div>
+                        <div class="trade-plan">
+                            <div class="plan-box entry-box">
+                                <div class="plan-label">ENTRY</div>
+                                <div class="plan-val" id="outEntry">--</div>
                             </div>
-                            <div class="level-card sl">
-                                <div class="level-label">STOP LOSS</div>
-                                <div class="level-value" id="resultSL">--</div>
-                                <div class="level-pips" id="slPips">--</div>
+                            <div class="plan-box sl-box">
+                                <div class="plan-label">STOP LOSS</div>
+                                <div class="plan-val" id="outSL">--</div>
+                                <div class="plan-pips" id="outSLPips">-- pips</div>
                             </div>
-                            <div class="level-card tp">
-                                <div class="level-label">TAKE PROFIT</div>
-                                <div class="level-value" id="resultTP">--</div>
-                                <div class="level-pips" id="tpPips">--</div>
+                            <div class="plan-box tp-box">
+                                <div class="plan-label">TAKE PROFIT</div>
+                                <div class="plan-val" id="outTP">--</div>
+                                <div class="plan-pips" id="outTPPips">-- pips</div>
                             </div>
                         </div>
+                        
+                        <div class="rr-ratio">Risk/Reward: <span class="rr-val" id="outRR">--</span></div>
 
-                        <div class="analysis-box">
-                            <div class="analysis-title">📝 Chart Analysis</div>
-                            <div class="analysis-text" id="resultAnalysis">--</div>
+                        <div style="margin-top: 15px;">
+                            <div class="analysis-text" id="outReason">--</div>
                         </div>
-
-                        <div class="timestamp" id="resultTime">--</div>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 
     <script>
-        // ============================================
-        // SESSIONS
-        // ============================================
-        
+        // ================= SESSION LOGIC =================
         const sessions = {
             tokyo: { start: 0, end: 9 },
             london: { start: 7, end: 16 },
@@ -650,360 +219,231 @@
         };
 
         function updateSessions() {
-            const now = new Date();
-            const h = now.getUTCHours();
-            const m = now.getUTCMinutes();
-            const s = now.getUTCSeconds();
-
-            Object.keys(sessions).forEach(key => {
-                const ses = sessions[key];
-                const card = document.getElementById(key + 'Card');
-                const status = document.getElementById(key + 'Status');
-                const timer = document.getElementById(key + 'Timer');
-                const label = document.getElementById(key + 'Label');
-
-                const active = h >= ses.start && h < ses.end;
+            const h = new Date().getUTCHours();
+            Object.keys(sessions).forEach(k => {
+                const s = sessions[k];
+                const active = h >= s.start && h < s.end;
+                const el = document.getElementById(k+'Card');
+                const timer = document.getElementById(k+'Timer');
                 
-                card.classList.toggle('active', active);
-                status.className = 'session-status ' + (active ? 'active' : 'inactive');
-                status.textContent = active ? '● Active' : '○ Closed';
-
-                if (active) {
-                    timer.textContent = `${ses.end - h - 1}h ${59-m}m ${59-s}s`;
-                    label.textContent = 'Closes in';
-                } else {
-                    let hrs = ses.start - h;
-                    if (hrs < 0) hrs += 24;
-                    timer.textContent = `${hrs}h ${59-m}m ${59-s}s`;
-                    label.textContent = 'Opens in';
-                }
+                el.classList.toggle('active', active);
+                timer.innerText = active ? '● OPEN' : '○ CLOSED';
+                timer.style.color = active ? '#00ff88' : '#666';
             });
         }
-
-        setInterval(updateSessions, 1000);
+        setInterval(updateSessions, 60000); // Check every minute
         updateSessions();
 
-        // ============================================
-        // IMAGE HANDLING
-        // ============================================
-        
-        let uploadedImage = null;
-
+        // ================= IMAGE HANDLING =================
         const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const previewContainer = document.getElementById('previewContainer');
-        const previewImage = document.getElementById('previewImage');
-        const dropContent = document.getElementById('dropContent');
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        let currentImageBase64 = null;
 
-        dropZone.addEventListener('click', () => {
-            if (!uploadedImage) fileInput.click();
-        });
+        dropZone.onclick = () => { if(!currentImageBase64) fileInput.click(); };
+        
+        fileInput.onchange = e => handleFile(e.target.files[0]);
+        
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.style.borderColor = '#00ff88'; };
+        dropZone.ondragleave = () => { dropZone.style.borderColor = '#333'; };
+        dropZone.ondrop = e => { 
+            e.preventDefault(); 
+            dropZone.style.borderColor = '#333';
+            if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        };
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files?.[0]) handleFile(e.target.files[0]);
-        });
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
-        });
-
-        document.addEventListener('paste', (e) => {
-            for (let item of e.clipboardData.items) {
-                if (item.type.includes('image')) {
-                    handleFile(item.getAsFile());
-                    break;
-                }
+        document.onpaste = e => {
+            const items = e.clipboardData.items;
+            for (let i of items) {
+                if (i.type.indexOf('image') !== -1) handleFile(i.getAsFile());
             }
-        });
+        };
 
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showError('Please upload an image');
-                return;
-            }
-
             const reader = new FileReader();
-            reader.onload = (e) => {
-                uploadedImage = e.target.result;
-                previewImage.src = uploadedImage;
-                dropContent.style.display = 'none';
-                previewContainer.classList.add('show');
-                dropZone.classList.add('has-image');
+            reader.onload = e => {
+                currentImageBase64 = e.target.result;
+                document.getElementById('previewImage').src = currentImageBase64;
+                document.getElementById('previewImage').classList.add('show');
+                document.getElementById('dropContent').classList.add('hide');
+                document.getElementById('clearBtn').style.display = 'inline-block';
             };
             reader.readAsDataURL(file);
         }
 
-        function removeImage() {
-            uploadedImage = null;
-            previewImage.src = '';
-            dropContent.style.display = 'flex';
-            previewContainer.classList.remove('show');
-            dropZone.classList.remove('has-image');
-            fileInput.value = '';
-        }
+        document.getElementById('clearBtn').onclick = (e) => {
+            e.stopPropagation();
+            currentImageBase64 = null;
+            document.getElementById('previewImage').src = '';
+            document.getElementById('previewImage').classList.remove('show');
+            document.getElementById('dropContent').classList.remove('hide');
+            document.getElementById('clearBtn').style.display = 'none';
+            document.getElementById('resultCard').classList.remove('show');
+        };
 
-        // ============================================
-        // LOAD SAVED KEY
-        // ============================================
+        // ================= ANALYSIS LOGIC =================
         
-        const savedKey = localStorage.getItem('openrouter_vision_key');
-        if (savedKey) document.getElementById('apiInput').value = savedKey;
+        // Auto-load API Key
+        const savedKey = localStorage.getItem('or_key');
+        if(savedKey) document.getElementById('apiKey').value = savedKey;
 
-        // ============================================
-        // VISION MODELS (OpenRouter)
-        // ============================================
-        
-        const VISION_MODELS = [
-            'qwen/qwen-2-vl-7b-instruct:free',
-            'meta-llama/llama-3.2-11b-vision-instruct:free',
-            'google/gemini-2.0-flash-exp:free',
-            'google/gemini-flash-1.5',
-            'anthropic/claude-3-haiku'
-        ];
+        async function runAnalysis() {
+            const key = document.getElementById('apiKey').value;
+            if(!key) return alert('Please enter OpenRouter API Key');
+            if(!currentImageBase64) return alert('Please upload a chart image first');
 
-        // ============================================
-        // ANALYZE
-        // ============================================
-        
-        async function analyzeChart() {
-            const apiKey = document.getElementById('apiInput').value.trim();
-            const strategy = document.getElementById('strategySelect').value;
-            const timeframe = document.getElementById('timeframeSelect').value;
+            localStorage.setItem('or_key', key);
+            
+            // UI State
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultCard').classList.remove('show');
+            document.getElementById('loadingText').innerText = "AI is analyzing structure...";
 
-            if (!uploadedImage) {
-                showError('⚠️ Upload a chart screenshot first');
-                return;
+            // Better Prompt Engineering for Precision
+            const strategy = document.getElementById('strategy').value;
+            const risk = document.getElementById('riskMode').value;
+
+            const prompt = `
+            You are a professional Gold (XAUUSD) Trader. Analyze this chart image.
+            
+            STRATEGY: ${strategy}
+            RISK_PROFILE: ${risk}
+
+            INSTRUCTIONS:
+            1. Identify the specific Current Price visible on the chart.
+            2. Identify Market Structure (Bullish/Bearish/Ranging).
+            3. Look for Order Blocks, FVG, or Key Levels close to price.
+            4. DECISION RULES:
+               - If price is at a key level: Signal = BUY/SELL (Market Execution).
+               - If price is FAR from a key level: Signal = WAIT or LIMIT ORDER.
+               - DO NOT say "Buy" if the price is in the middle of a range.
+
+            OUTPUT FORMAT:
+            You must return ONLY valid JSON:
+            {
+                "bias": "BUY" | "SELL" | "WAIT",
+                "confidence": number (0-100),
+                "action_type": "MARKET" | "LIMIT" | "NONE",
+                "current_price": number,
+                "entry_price": number,
+                "stop_loss": number,
+                "take_profit": number,
+                "reasoning": "Short concise explanation of structure and why."
             }
+            `;
 
-            if (!apiKey) {
-                showError('⚠️ Enter OpenRouter API key from openrouter.ai/keys');
-                return;
-            }
+            const models = [
+                'google/gemini-2.0-flash-exp:free', // Fast & Good Vision
+                'meta-llama/llama-3.2-11b-vision-instruct:free', // Good Vision
+                'google/gemini-flash-1.5' // Backup
+            ];
 
-            localStorage.setItem('openrouter_vision_key', apiKey);
-            hideError();
+            let result = null;
 
-            const btn = document.getElementById('analyzeBtn');
-            btn.disabled = true;
-
-            let success = false;
-            let lastError = '';
-
-            for (const model of VISION_MODELS) {
-                if (success) break;
-                
+            for (const model of models) {
                 try {
-                    console.log('Trying model:', model);
-                    btn.innerHTML = `<div class="spinner"></div> ${model.split('/')[1].split(':')[0]}...`;
+                    document.getElementById('loadingText').innerText = `Consulting model: ${model.split('/')[1]}...`;
                     
-                    const result = await callOpenRouter(apiKey, model, strategy, timeframe);
-                    displayResult(result, strategy, timeframe);
-                    success = true;
-                    console.log('Success with:', model);
-                } catch (err) {
-                    console.log(`${model} failed:`, err.message);
-                    lastError = err.message;
+                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${key}`,
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": window.location.href,
+                        },
+                        body: JSON.stringify({
+                            "model": model,
+                            "messages": [
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        { "type": "text", "text": prompt },
+                                        { "type": "image_url", "image_url": { "url": currentImageBase64 } }
+                                    ]
+                                }
+                            ],
+                            "response_format": { "type": "json_object" } 
+                        })
+                    });
+
+                    const data = await response.json();
+                    if(data.choices && data.choices[0].message.content) {
+                        let content = data.choices[0].message.content;
+                        // Clean markdown if present
+                        content = content.replace(/```json/g, '').replace(/```/g, '');
+                        result = JSON.parse(content);
+                        break; // Success
+                    }
+                } catch (e) {
+                    console.error("Model failed", e);
+                    continue; // Try next model
                 }
             }
 
-            if (!success) {
-                showError('❌ ' + lastError);
-            }
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = false;
 
-            btn.disabled = false;
-            btn.innerHTML = '🔍 Analyze Chart';
+            if(result) {
+                displayResults(result);
+            } else {
+                alert("Analysis failed. Please try a clearer screenshot or check API key.");
+            }
         }
 
-        // ============================================
-        // OPENROUTER API
-        // ============================================
-        
-        async function callOpenRouter(apiKey, model, strategy, timeframe) {
-            const h = new Date().getUTCHours();
-            let session = 'Asian Session';
-            if (h >= 7 && h < 16) session = 'London Session';
-            if (h >= 12 && h < 21) session = 'New York Session';
-            if (h >= 12 && h < 16) session = 'London-NY Overlap';
-
-            const configs = {
-                scalping: { sl: '10-20', tp: '15-30' },
-                intraday: { sl: '20-35', tp: '40-70' },
-                swing: { sl: '40-70', tp: '80-150' },
-                smc: { sl: '20-40', tp: '50-100' }
-            };
-            const cfg = configs[strategy];
-
-            const prompt = `You are an expert XAU/USD (Gold) trading analyst. Look at this trading chart carefully.
-
-CONTEXT:
-- Instrument: XAU/USD Gold
-- Strategy: ${strategy.toUpperCase()}
-- Timeframe: ${timeframe.toUpperCase()}
-- Session: ${session}
-- Stop Loss Range: ${cfg.sl} pips
-- Take Profit Range: ${cfg.tp} pips
-
-ANALYZE THE CHART:
-1. Read the current price from chart
-2. Identify trend direction (bullish/bearish/ranging)
-3. Find key support and resistance levels
-4. Read any visible indicators (RSI, MACD, EMA, Bollinger Bands, etc.)
-5. Identify order blocks, FVG, or other SMC concepts if visible
-6. Determine the best trade direction
-
-PROVIDE YOUR ANALYSIS IN THIS EXACT FORMAT:
-
-BIAS: [Strong Buy / Buy / Neutral / Sell / Strong Sell]
-CONFIDENCE: [50-95]%
-CURRENT_PRICE: [the price you see on chart]
-ENTRY: [specific entry price]
-STOP_LOSS: [stop loss price]
-TAKE_PROFIT: [take profit price]
-
-ANALYSIS:
-[Detailed explanation of what you see on the chart: trend, price action, support/resistance, indicator readings, patterns. Explain why you recommend this trade direction.]`;
-
-            // Prepare image for API
-            const base64 = uploadedImage.split(',')[1];
-            const mimeType = uploadedImage.split(';')[0].split(':')[1];
-
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.href,
-                    'X-Title': 'XAU/USD Chart Analysis'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: [{
-                        role: 'user',
-                        content: [
-                            {
-                                type: 'text',
-                                text: prompt
-                            },
-                            {
-                                type: 'image_url',
-                                image_url: {
-                                    url: uploadedImage
-                                }
-                            }
-                        ]
-                    }],
-                    max_tokens: 1500,
-                    temperature: 0.2
-                })
-            });
-
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error?.message || `API Error ${response.status}`);
-            }
-
-            const data = await response.json();
+        function displayResults(data) {
+            const card = document.getElementById('resultCard');
             
-            if (!data.choices?.[0]?.message?.content) {
-                throw new Error('No response from AI');
-            }
+            // Bias Formatting
+            const biasEl = document.getElementById('outBias');
+            biasEl.innerText = data.bias;
+            biasEl.className = 'bias-large bias-' + data.bias.toLowerCase();
 
-            return parseResult(data.choices[0].message.content);
-        }
-
-        // ============================================
-        // PARSE RESULT
-        // ============================================
-        
-        function parseResult(text) {
-            console.log('AI Response:', text);
-
-            const get = (key) => {
-                const match = text.match(new RegExp(`${key}[:\\s]+(.+?)(?:\\n|$)`, 'i'));
-                return match ? match[1].trim() : '';
-            };
-
-            const getNum = (key) => {
-                const val = get(key).replace(/[^0-9.]/g, '');
-                return parseFloat(val) || 0;
-            };
-
-            const bias = get('BIAS') || 'Neutral';
-            const confidence = parseInt(get('CONFIDENCE')) || 70;
-            const currentPrice = getNum('CURRENT_PRICE');
-            const entry = getNum('ENTRY') || currentPrice;
-            const sl = getNum('STOP_LOSS');
-            const tp = getNum('TAKE_PROFIT');
+            // Action Type Logic
+            const typeEl = document.getElementById('outType');
+            let actionType = data.action_type || 'MARKET';
             
-            let analysis = text;
-            if (text.includes('ANALYSIS:')) {
-                analysis = text.split('ANALYSIS:')[1].trim();
+            // Correction Logic: If Entry is far from Current, force LIMIT
+            if (data.current_price && data.entry_price) {
+                const diff = Math.abs(data.current_price - data.entry_price);
+                // If difference is > 20 pips (approx 2.0 on Gold), mark as Limit
+                if (diff > 2.0 && data.bias !== 'WAIT') {
+                    actionType = 'LIMIT'; 
+                }
             }
-            analysis = analysis.substring(0, 1200);
+            if (data.bias === 'WAIT') actionType = 'WAITING';
 
-            return { bias, confidence, currentPrice, entry, sl, tp, analysis };
-        }
+            typeEl.innerText = actionType;
+            typeEl.className = 'type-badge ' + actionType.toLowerCase();
 
-        // ============================================
-        // DISPLAY RESULT
-        // ============================================
-        
-        function displayResult(data, strategy, timeframe) {
-            document.getElementById('placeholder').style.display = 'none';
-            document.getElementById('result').classList.add('show');
+            document.getElementById('outConf').innerText = data.confidence + '%';
+            document.getElementById('outEntry').innerText = data.entry_price || '--';
+            document.getElementById('outSL').innerText = data.stop_loss || '--';
+            document.getElementById('outTP').innerText = data.take_profit || '--';
+            document.getElementById('outReason').innerText = data.reasoning;
 
-            document.getElementById('badgeStrategy').textContent = strategy.toUpperCase();
-            document.getElementById('badgeTF').textContent = timeframe.toUpperCase();
-
-            const biasEl = document.getElementById('resultBias');
-            biasEl.textContent = data.bias;
-            biasEl.className = 'signal-bias ' + data.bias.toLowerCase().replace(/\s+/g, '-');
-
-            document.getElementById('confidenceValue').textContent = data.confidence + '%';
-            const fill = document.getElementById('confidenceFill');
-            fill.style.width = data.confidence + '%';
-            fill.className = 'confidence-fill ' + 
-                (data.confidence >= 75 ? 'high' : data.confidence >= 50 ? 'medium' : 'low');
-
-            document.getElementById('resultEntry').textContent = data.entry ? '$' + data.entry.toFixed(0) : '--';
-            document.getElementById('resultSL').textContent = data.sl ? '$' + data.sl.toFixed(0) : '--';
-            document.getElementById('resultTP').textContent = data.tp ? '$' + data.tp.toFixed(0) : '--';
-
-            if (data.entry && data.sl) {
-                document.getElementById('slPips').textContent = Math.abs(data.sl - data.entry).toFixed(0) + ' pips';
-            }
-            if (data.entry && data.tp) {
-                document.getElementById('tpPips').textContent = Math.abs(data.tp - data.entry).toFixed(0) + ' pips';
+            // Pips Calculation
+            if(data.entry_price && data.stop_loss) {
+                const slPips = Math.abs(data.entry_price - data.stop_loss) * 10; // Gold pips
+                document.getElementById('outSLPips').innerText = slPips.toFixed(1) + ' pips';
+                
+                if(data.take_profit) {
+                    const tpPips = Math.abs(data.take_profit - data.entry_price) * 10;
+                    document.getElementById('outTPPips').innerText = tpPips.toFixed(1) + ' pips';
+                    
+                    // Risk Reward
+                    const rr = tpPips / slPips;
+                    document.getElementById('outRR').innerText = "1:" + rr.toFixed(2);
+                    document.getElementById('outRR').style.color = rr > 1.5 ? '#00ff88' : '#ffd700';
+                }
             }
 
-            document.getElementById('resultAnalysis').textContent = data.analysis;
-            document.getElementById('resultTime').textContent = 'Analyzed: ' + new Date().toLocaleString();
+            card.classList.add('show');
+            // Auto scroll to result
+            card.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ============================================
-        // ERRORS
-        // ============================================
-        
-        function showError(msg) {
-            document.getElementById('errorText').textContent = msg;
-            document.getElementById('errorBox').classList.add('show');
-        }
-
-        function hideError() {
-            document.getElementById('errorBox').classList.remove('show');
-        }
     </script>
-
 </body>
 </html>
