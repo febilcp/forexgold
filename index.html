@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Pro Analyst (Precision Fix)</title>
+    <title>XAU/USD Pro Analyst (v4.0)</title>
     <style>
         /* ================= STYLES ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,7 +25,6 @@
         .sessions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .session-card { background: #13131f; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); }
         .session-card.active { border-color: #00ff88; background: linear-gradient(145deg, #13131f, #1a2a20); }
-        .session-icon { font-size: 1.5rem; margin-bottom: 5px; }
         .session-name { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
         .session-timer { font-size: 1rem; font-family: 'Courier New', monospace; font-weight: 700; }
         .timer-open { color: #00ff88; } .timer-closed { color: #888; } .timer-waiting { color: #ffd700; }
@@ -53,7 +52,7 @@
         .control-select, .api-input { width: 100%; background: #0a0a12; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; font-size: 0.9rem; }
         .control-select:focus, .api-input:focus { border-color: #ffd700; }
 
-        /* Price Input - Key Feature */
+        /* Price Input */
         .price-input-group { position: relative; }
         .price-input-group span { position: absolute; left: 12px; top: 12px; color: #ffd700; font-weight: bold; }
         .price-input { padding-left: 25px; border-color: #ffd700; background: rgba(255, 215, 0, 0.05); }
@@ -83,9 +82,36 @@
         .entry-box .plan-val { color: #8da2fb; }
         .sl-box .plan-val { color: #ff4757; }
         .tp-box .plan-val { color: #00ff88; }
-        .plan-pips { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
 
-        .analysis-text { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; color: #ccc; white-space: pre-wrap; border-left: 3px solid #666; }
+        .analysis-text { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; color: #ccc; white-space: pre-wrap; border-left: 3px solid #666; margin-bottom: 20px; }
+
+        /* === NEW FEATURES CSS === */
+        
+        /* Calculator Section */
+        .calculator-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .calc-title { font-size: 0.8rem; color: #ffd700; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .calc-row { display: flex; gap: 10px; align-items: center; }
+        .calc-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; width: 100px; font-size: 0.9rem; }
+        .calc-result { margin-left: auto; text-align: right; }
+        .lot-size { font-size: 1.4rem; font-weight: bold; color: #00ff88; }
+        .lot-label { font-size: 0.7rem; color: #888; }
+
+        /* Copy Button */
+        .copy-btn {
+            background: #333; color: #fff; border: 1px solid #555;
+            padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px; margin: 0 auto;
+            transition: 0.2s;
+        }
+        .copy-btn:hover { background: #444; border-color: #777; }
+        .copy-btn:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
@@ -101,17 +127,14 @@
 
         <div class="sessions-grid">
             <div class="session-card" id="tokyoCard">
-                <div class="session-icon">🗼</div>
                 <div class="session-name">TOKYO</div>
                 <div class="session-timer" id="tokyoTimer">--:--:--</div>
             </div>
             <div class="session-card" id="londonCard">
-                <div class="session-icon">🏰</div>
                 <div class="session-name">LONDON</div>
                 <div class="session-timer" id="londonTimer">--:--:--</div>
             </div>
             <div class="session-card" id="newyorkCard">
-                <div class="session-icon">🗽</div>
                 <div class="session-name">NEW YORK</div>
                 <div class="session-timer" id="newyorkTimer">--:--:--</div>
             </div>
@@ -133,10 +156,10 @@
                 <div class="ai-controls">
                     
                     <div class="control-group">
-                        <label class="control-label">CURRENT LIVE PRICE (Required for Accuracy)</label>
+                        <label class="control-label">CURRENT LIVE PRICE (Recommended)</label>
                         <div class="price-input-group">
                             <span>$</span>
-                            <input type="number" id="currentPrice" class="api-input price-input" placeholder="e.g. 2653.50 (Enter manually if needed)" step="0.01">
+                            <input type="number" id="currentPrice" class="api-input price-input" placeholder="e.g. 2653.50" step="0.01">
                         </div>
                     </div>
 
@@ -144,9 +167,9 @@
                         <div class="control-group">
                             <label class="control-label">STRATEGY</label>
                             <select id="strategy" class="control-select">
-                                <option value="intraday">📊 Intraday (1H/4H)</option>
-                                <option value="scalping">⚡ Scalping (1M/5M)</option>
-                                <option value="swing">📈 Swing (Daily)</option>
+                                <option value="intraday">📊 Intraday</option>
+                                <option value="scalping">⚡ Scalping</option>
+                                <option value="swing">📈 Swing</option>
                             </select>
                         </div>
                         <div class="control-group">
@@ -165,7 +188,7 @@
                     </div>
                     
                     <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
-                        🚀 ANALYZE WITH LIVE PRICE
+                        🚀 ANALYZE CHART
                     </button>
                 </div>
 
@@ -190,20 +213,37 @@
                             <div class="plan-box sl-box">
                                 <div class="plan-label">STOP LOSS</div>
                                 <div class="plan-val" id="outSL">--</div>
-                                <div class="plan-pips" id="outSLPips">--</div>
                             </div>
                             <div class="plan-box tp-box">
                                 <div class="plan-label">TAKE PROFIT</div>
                                 <div class="plan-val" id="outTP">--</div>
-                                <div class="plan-pips" id="outTPPips">--</div>
                             </div>
                         </div>
                         
-                        <div style="text-align:center; font-size:0.8rem; color:#666; margin-bottom:15px;">
-                            Risk/Reward: <span id="outRR" style="color:#fff; font-weight:bold;">--</span>
+                        <div class="analysis-text" id="outReason">--</div>
+
+                        <button class="copy-btn" onclick="copySignal()">
+                            📋 Copy Signal
+                        </button>
+
+                        <div class="calculator-box">
+                            <div class="calc-title">💰 Position Size Calculator</div>
+                            <div class="calc-row">
+                                <div>
+                                    <label class="lot-label">Balance ($)</label><br>
+                                    <input type="number" id="calcBalance" class="calc-input" value="1000" oninput="calculateLots()">
+                                </div>
+                                <div>
+                                    <label class="lot-label">Risk (%)</label><br>
+                                    <input type="number" id="calcRisk" class="calc-input" value="1" step="0.5" oninput="calculateLots()">
+                                </div>
+                                <div class="calc-result">
+                                    <div class="lot-size" id="calcLots">0.00</div>
+                                    <div class="lot-label">Std Lots</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="analysis-text" id="outReason">--</div>
                     </div>
                 </div>
             </div>
@@ -223,11 +263,10 @@
             const day = now.getUTCDay();
             const hour = now.getUTCHours();
             
-            // Market Closed Check (Sat/Sun)
+            // Market Closed: Sat (all day), Sun (<22), Fri (>=22)
             let isClosed = (day === 6) || (day === 0 && hour < 22) || (day === 5 && hour >= 22);
             let openTime = new Date(now);
             
-            // Calc time to open
             if(day === 6) openTime.setUTCDate(now.getUTCDate() + 1);
             if(day === 5 && hour >= 22) openTime.setUTCDate(now.getUTCDate() + 2);
             openTime.setUTCHours(22, 0, 0, 0);
@@ -252,7 +291,6 @@
                 
                 let isOpen = !isClosed && (hour >= config.start && hour < config.end);
                 
-                // Simple display logic
                 if(isClosed) {
                     timer.textContent = "WAITING";
                     timer.className = "session-timer timer-waiting";
@@ -317,6 +355,9 @@
         const savedKey = localStorage.getItem('or_key');
         if(savedKey) document.getElementById('apiKey').value = savedKey;
 
+        // Store analysis result globally for calculator
+        let currentAnalysis = { entry: 0, sl: 0 };
+
         async function runAnalysis() {
             const key = document.getElementById('apiKey').value.trim();
             const userPrice = document.getElementById('currentPrice').value;
@@ -324,13 +365,9 @@
             if(!key) return alert('⚠️ Please enter API Key');
             if(!currentImageBase64) return alert('⚠️ Please upload a chart');
             
-            // USER PRICE WARNING
-            let pricePrompt = "";
-            if(userPrice) {
-                pricePrompt = `USER_PROVIDED_CURRENT_PRICE: ${userPrice}. USE THIS EXACT PRICE as the reference anchor. Do not read price from image OCR if it conflicts.`;
-            } else {
-                pricePrompt = `READ THE Y-AXIS (Right Side) carefully for the current price. If you cannot see it clearly, ESTABLISH the price based on visible levels.`;
-            }
+            let pricePrompt = userPrice 
+                ? `USER_PROVIDED_CURRENT_PRICE: ${userPrice}. USE THIS EXACT PRICE as the anchor.`
+                : `READ THE Y-AXIS (Right Side) carefully for the current price.`;
 
             localStorage.setItem('or_key', key);
             
@@ -372,7 +409,7 @@
                     method: "POST",
                     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "google/gemini-2.0-flash-exp:free", // Best for vision currently
+                        model: "google/gemini-2.0-flash-exp:free",
                         messages: [{
                             role: "user",
                             content: [
@@ -393,7 +430,7 @@
                 displayResults(result, userPrice);
 
             } catch (e) {
-                alert("Analysis Error: " + e.message + "\n\nTry entering the Current Price manually!");
+                alert("Analysis Error: " + e.message);
             }
 
             document.getElementById('loading').style.display = 'none';
@@ -410,29 +447,76 @@
             document.getElementById('outConf').innerText = data.confidence + '%';
 
             // Prices
-            // If user provided a price, ensure we display something close to it if AI hallucinated wildly
             let current = parseFloat(userOverride) || data.current_price;
             
-            document.getElementById('outEntry').innerText = data.entry_price || current;
-            document.getElementById('outSL').innerText = data.stop_loss || '0.00';
-            document.getElementById('outTP').innerText = data.take_profit || '0.00';
+            const entry = data.entry_price || current;
+            const sl = data.stop_loss || 0;
+            const tp = data.take_profit || 0;
+
+            // Store for calculator
+            currentAnalysis = { 
+                bias: data.bias,
+                entry: entry, 
+                sl: sl,
+                tp: tp,
+                reason: data.reasoning
+            };
+
+            document.getElementById('outEntry').innerText = entry;
+            document.getElementById('outSL').innerText = sl || '--';
+            document.getElementById('outTP').innerText = tp || '--';
             document.getElementById('outReason').innerText = data.reasoning;
 
-            // Pips & RR
-            if(data.entry_price && data.stop_loss) {
-                const slPips = Math.abs(data.entry_price - data.stop_loss) * 10;
-                document.getElementById('outSLPips').innerText = slPips.toFixed(1) + ' pips';
-                
-                if(data.take_profit) {
-                    const tpPips = Math.abs(data.take_profit - data.entry_price) * 10;
-                    document.getElementById('outTPPips').innerText = tpPips.toFixed(1) + ' pips';
-                    const rr = tpPips / slPips;
-                    document.getElementById('outRR').innerText = "1:" + rr.toFixed(2);
-                }
-            }
+            // Trigger Calculator
+            calculateLots();
 
             card.classList.add('show');
             card.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ================= CALCULATOR & UTILS =================
+        
+        function calculateLots() {
+            if(!currentAnalysis.entry || !currentAnalysis.sl) return;
+            if(currentAnalysis.sl === 0) return;
+
+            const balance = parseFloat(document.getElementById('calcBalance').value);
+            const riskPerc = parseFloat(document.getElementById('calcRisk').value);
+            
+            // 1. Calculate Risk Amount in USD
+            const riskAmount = balance * (riskPerc / 100);
+
+            // 2. Calculate Distance in Price (Dollars)
+            const distance = Math.abs(currentAnalysis.entry - currentAnalysis.sl);
+
+            // 3. XAUUSD Standard Lot Calculation
+            // Standard Contract: 100 oz
+            // $1 movement = $100 profit/loss per 1.0 Lot
+            // Formula: Lots = RiskAmount / (Distance * 100)
+            
+            if(distance <= 0) return;
+
+            const lots = riskAmount / (distance * 100);
+            
+            document.getElementById('calcLots').innerText = lots.toFixed(2);
+        }
+
+        function copySignal() {
+            if(!currentAnalysis.entry) return;
+
+            const text = `⚠️ XAU/USD SIGNAL\n\n` +
+                         `Bias: ${currentAnalysis.bias}\n` +
+                         `Entry: ${currentAnalysis.entry}\n` +
+                         `SL: ${currentAnalysis.sl}\n` +
+                         `TP: ${currentAnalysis.tp}\n\n` +
+                         `Reason: ${currentAnalysis.reason}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = "✅ Copied!";
+                setTimeout(() => btn.innerHTML = originalText, 2000);
+            });
         }
     </script>
 </body>
