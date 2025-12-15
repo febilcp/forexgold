@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD SMC Sniper (v9.0)</title>
+    <title>XAU/USD SMC Sniper (v10.0 - Volatility Fix)</title>
     <style>
         /* ================= DARK THEME ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,6 +65,8 @@
         .level-card.entry { border-color: rgba(100,149,237,0.3); } .level-card.entry .level-price { color: #6495ed; }
         .level-card.sl { border-color: rgba(255,71,87,0.3); } .level-card.sl .level-price { color: #ff4757; }
         .level-card.tp { border-color: rgba(0,255,136,0.3); } .level-card.tp .level-price { color: #00ff88; }
+        
+        .pips-diff { font-size: 0.7rem; opacity: 0.6; margin-top: 5px; }
 
         .reason-text { font-size: 0.9rem; line-height: 1.6; color: #bbb; background: #161616; padding: 15px; border-radius: 10px; border-left: 3px solid #444; }
 
@@ -78,7 +80,7 @@
 
 <div class="container">
     <header class="header">
-        <h1>🥇 XAU/USD SMC SNIPER</h1>
+        <h1>🥇 XAU/USD SMC SNIPER v10</h1>
         <div class="status-badge status-open" id="statusBadge">
             <span class="pulse"></span> <span id="statusText">MARKET OPEN</span>
         </div>
@@ -100,13 +102,13 @@
         <div class="controls-card">
             
             <div class="input-group">
-                <label class="label" style="color:#00ff88;">AI Model ID (Paste if Error 404)</label>
+                <label class="label" style="color:#00ff88;">AI Model ID</label>
                 <input type="text" id="modelId" class="input-field" value="google/gemini-2.0-flash-exp:free" placeholder="e.g. google/gemini-flash-1.5-8b">
             </div>
 
             <div class="row">
                 <div class="input-group">
-                    <label class="label">Current Price</label>
+                    <label class="label">Current Price (Exact)</label>
                     <input type="number" id="price" class="input-field" placeholder="2650.00" step="0.01">
                 </div>
                 <div class="input-group">
@@ -127,7 +129,7 @@
 
             <div class="loading" id="loader">
                 <div class="spinner"></div>
-                <div style="font-size:0.8rem; color:#ffd700;">Scanning Order Blocks...</div>
+                <div style="font-size:0.8rem; color:#ffd700;">Applying Volatility Filter...</div>
             </div>
 
             <div class="result-box" id="result">
@@ -150,10 +152,12 @@
                     <div class="level-card sl">
                         <div class="level-title">STOP LOSS</div>
                         <div class="level-price" id="resSL">--</div>
+                        <div class="pips-diff" id="slDist">--</div>
                     </div>
                     <div class="level-card tp">
                         <div class="level-title">TAKE PROFIT</div>
                         <div class="level-price" id="resTP">--</div>
+                        <div class="pips-diff" id="tpDist">--</div>
                     </div>
                 </div>
 
@@ -231,25 +235,27 @@
         document.getElementById('loader').style.display = 'block';
         document.getElementById('result').classList.remove('show');
 
-        // PROMPT ENGINEERING (THE FIX)
-        // This prompts forces the AI to NOT just use current price.
+        // FORCE AI TO USE WIDER LEVELS (VOLATILITY GUARD)
+        // We tell the AI: "A Gold Scalp SL must be at least $2.00 away."
         const systemPrompt = `
-        You are an elite Institutional Gold Trader (SMC Strategy).
+        You are an elite Institutional Gold Trader.
         
         INPUTS:
         - Current Market Price: ${price ? price : "Read from Chart Axis"}
         - Strategy: ${strategy.toUpperCase()}
         
-        STRICT RULES:
-        1. IDENTIFY TREND: Is market Trending or Ranging?
-        2. FIND KEY LEVEL: Look for Order Blocks (OB), Fair Value Gaps (FVG), or Liquidity Sweeps.
-        3. ENTRY RULE: 
-           - IF Current Price is FAR (>20 pips) from Key Level -> Signal is LIMIT ORDER (Pending).
-           - IF Current Price is AT Key Level -> Signal is MARKET EXECUTION.
-           - IF Price is in "No Man's Land" (middle of range) -> Signal is WAIT.
-        4. STOP LOSS: Must be behind the last Swing High/Low. Tight stops (20-30 pips for scalping).
+        CRITICAL RULES FOR GOLD (XAU/USD):
+        1. SPREAD PROTECTION: Gold has spread. 
+           - STOP LOSS must be AT LEAST $2.00 (20 pips) away from Entry.
+           - TAKE PROFIT must be AT LEAST $3.00 (30 pips) away from Entry.
+           - DO NOT provide tight ranges like $0.30 or $0.50. They are impossible to trade.
         
-        OUTPUT FORMAT (JSON ONLY):
+        2. LOGIC:
+           - Identify Trend & Key Levels (Order Blocks/FVG).
+           - IF Price is >$2.00 away from key level -> SIGNAL: LIMIT.
+           - IF Price is <$2.00 from key level -> SIGNAL: MARKET.
+           
+        3. OUTPUT JSON:
         {
             "bias": "BUY" | "SELL" | "WAIT",
             "type": "MARKET" | "LIMIT" | "WAITING",
@@ -257,7 +263,7 @@
             "entry": number,
             "sl": number,
             "tp": number,
-            "reason": "Concise technical reason (e.g. 'Price tapping 15m Bullish OB + FVG fill')."
+            "reason": "Technical reason using SMC concepts."
         }
         `;
 
@@ -299,6 +305,17 @@
             document.getElementById('resSL').innerText = res.sl || '--';
             document.getElementById('resTP').innerText = res.tp || '--';
             document.getElementById('resReason').innerText = res.reason;
+
+            // Show Pips Distance
+            if(res.entry && res.sl) {
+                const diff = Math.abs(res.entry - res.sl).toFixed(2);
+                document.getElementById('slDist').innerText = diff + " USD range";
+                document.getElementById('slDist').style.color = diff < 1.5 ? 'red' : '#666'; // Warn if too tight
+            }
+             if(res.entry && res.tp) {
+                const diff = Math.abs(res.entry - res.tp).toFixed(2);
+                document.getElementById('tpDist').innerText = diff + " USD range";
+            }
 
             document.getElementById('result').classList.add('show');
 
