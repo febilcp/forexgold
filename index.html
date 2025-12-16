@@ -3,267 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD SMC Sniper (v10.0 - Volatility Fix)</title>
+    <title>XAU/USD Pro Dashboard (v11.0)</title>
     <style>
-        /* ================= DARK THEME ================= */
+        /* ================= PROFESSIONAL DASHBOARD THEME ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #050505; min-height: 100vh; color: #cfcfcf; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 20px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(20, 20, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .header h1 { font-size: 1.5rem; color: #ffd700; font-weight: 800; letter-spacing: -0.5px; }
-        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .status-open { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.2); }
-        .status-closed { background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.2); }
-        .pulse { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #1e293b; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #3b82f6; } /* Blue accent */
 
-        /* GRID LAYOUT */
-        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
-        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+        /* MAIN LAYOUT */
+        .grid-layout { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        /* CARDS */
+        .card { background: #1e293b; border-radius: 12px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .card-header { padding: 15px 20px; background: #253045; border-bottom: 1px solid #334155; font-weight: 600; font-size: 0.9rem; color: #94a3b8; display: flex; justify-content: space-between; }
+        .card-body { padding: 20px; }
 
         /* UPLOAD ZONE */
-        .upload-card { background: #111; border-radius: 16px; padding: 20px; border: 1px solid #222; height: 100%; display: flex; flex-direction: column; }
-        .drop-zone { border: 2px dashed #333; border-radius: 12px; flex: 1; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.01); position: relative; overflow: hidden; }
-        .drop-zone:hover { border-color: #ffd700; background: rgba(255, 215, 0, 0.02); }
-        .preview-img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+        .drop-zone { border: 2px dashed #475569; border-radius: 8px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.01); min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .drop-zone:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .preview-img { max-width: 100%; max-height: 250px; border-radius: 6px; display: none; }
         .preview-img.show { display: block; }
-        .placeholder { text-align: center; color: #555; pointer-events: none; }
-        .placeholder.hide { display: none; }
-        
-        /* CONTROLS */
-        .controls-card { background: #111; border-radius: 16px; padding: 25px; border: 1px solid #222; }
+
+        /* INPUTS */
         .input-group { margin-bottom: 15px; }
-        .label { display: block; font-size: 0.7rem; color: #666; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-        .input-field { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; font-size: 0.9rem; transition: 0.2s; }
-        .input-field:focus { border-color: #ffd700; }
+        .label { display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .input { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 12px; border-radius: 6px; outline: none; transition: 0.2s; font-size: 0.9rem; }
+        .input:focus { border-color: #3b82f6; }
         
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #2563eb; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .analyze-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #ff9900); border: none; border-radius: 8px; color: #000; font-weight: 900; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15); }
-        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(255, 215, 0, 0.25); }
-        .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* === RESULT DASHBOARD (Mimicking Chart Analyst) === */
+        .result-container { display: none; }
+        .result-container.show { display: block; }
 
-        /* RESULTS */
-        .result-box { margin-top: 20px; display: none; animation: slideUp 0.4s ease-out; }
-        .result-box.show { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .signal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #222; }
-        .bias { font-size: 2rem; font-weight: 900; }
-        .bias.BUY { color: #00ff88; text-shadow: 0 0 20px rgba(0,255,136,0.2); }
-        .bias.SELL { color: #ff4757; text-shadow: 0 0 20px rgba(255,71,87,0.2); }
-        .bias.WAIT { color: #888; }
+        /* Signal Banner */
+        .signal-banner { padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
+        .signal-banner.BUY { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+        .signal-banner.SELL { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        .signal-title { font-size: 1.4rem; font-weight: 800; }
+        .BUY .signal-title { color: #34d399; }
+        .SELL .signal-title { color: #f87171; }
         
-        .type-badge { background: #222; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #aaa; border: 1px solid #333; }
-        
-        .levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .level-card { background: #161616; padding: 15px 10px; border-radius: 10px; text-align: center; border: 1px solid #252525; }
-        .level-title { font-size: 0.7rem; color: #666; margin-bottom: 5px; font-weight: 700; }
-        .level-price { font-size: 1.1rem; font-weight: 700; color: #fff; }
-        .level-card.entry { border-color: rgba(100,149,237,0.3); } .level-card.entry .level-price { color: #6495ed; }
-        .level-card.sl { border-color: rgba(255,71,87,0.3); } .level-card.sl .level-price { color: #ff4757; }
-        .level-card.tp { border-color: rgba(0,255,136,0.3); } .level-card.tp .level-price { color: #00ff88; }
-        
-        .pips-diff { font-size: 0.7rem; opacity: 0.6; margin-top: 5px; }
+        /* Confidence Bar */
+        .conf-wrapper { display: flex; align-items: center; gap: 10px; }
+        .conf-bar-bg { width: 100px; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
+        .conf-bar-fill { height: 100%; background: #fbbf24; width: 0%; transition: 1s; }
+        .conf-text { font-weight: 700; color: #fbbf24; }
 
-        .reason-text { font-size: 0.9rem; line-height: 1.6; color: #bbb; background: #161616; padding: 15px; border-radius: 10px; border-left: 3px solid #444; }
+        /* VISUAL BAR (The Key Feature) */
+        .visual-bar-container { background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .visual-bar-title { font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .visual-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+        .vb-sl { background: #ef4444; flex: 1; margin-right: 2px; border-radius: 2px; }
+        .vb-entry { width: 4px; background: #fff; z-index: 2; }
+        .vb-tp { background: #10b981; flex: 2; margin-left: 2px; border-radius: 2px; }
+        
+        .visual-labels { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; }
+        .vl-sl { color: #ef4444; }
+        .vl-entry { color: #fff; }
+        .vl-tp { color: #10b981; }
 
-        .loading { display: none; text-align: center; padding: 40px; }
-        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,215,0,0.2); border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        /* METRICS GRID */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .metric-card { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .metric-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 5px; }
+        .metric-val { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
+        .metric-sub { font-size: 0.7rem; color: #64748b; margin-top: 3px; }
+
+        /* REASONING */
+        .reason-box { background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; }
+
+        /* LOADING */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+        .loader { width: 40px; height: 40px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header class="header">
-        <h1>🥇 XAU/USD SMC SNIPER v10</h1>
-        <div class="status-badge status-open" id="statusBadge">
-            <span class="pulse"></span> <span id="statusText">MARKET OPEN</span>
-        </div>
-    </header>
+    <div class="loading-overlay" id="loader">
+        <div class="loader"></div>
+        <div style="color: #3b82f6; font-weight: 600;">Analyzing Chart Structure...</div>
+    </div>
 
-    <div class="main-grid">
-        <div class="upload-card">
-            <div class="drop-zone" id="dropZone">
-                <div class="placeholder" id="dropText">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">📸</div>
-                    <div style="font-weight: 700;">Upload 15m Chart</div>
-                    <div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">Paste (Ctrl+V) or Drag Image</div>
-                </div>
-                <img id="preview" class="preview-img">
-            </div>
-            <button onclick="clearImage()" style="background:none; border:none; color:#ff4757; cursor:pointer; margin-top:10px; font-size:0.8rem; display:none;" id="clearBtn">Remove Image</button>
-        </div>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><span>⚡</span> XAU/USD PRO DASHBOARD</div>
+            <div style="font-size: 0.8rem; color: #64748b;">v11.0 Safe-Mode</div>
+        </header>
 
-        <div class="controls-card">
+        <div class="grid-layout">
             
-            <div class="input-group">
-                <label class="label" style="color:#00ff88;">AI Model ID</label>
-                <input type="text" id="modelId" class="input-field" value="google/gemini-2.0-flash-exp:free" placeholder="e.g. google/gemini-flash-1.5-8b">
-            </div>
-
-            <div class="row">
-                <div class="input-group">
-                    <label class="label">Current Price (Exact)</label>
-                    <input type="number" id="price" class="input-field" placeholder="2650.00" step="0.01">
-                </div>
-                <div class="input-group">
-                    <label class="label">Strategy</label>
-                    <select id="strategy" class="input-field">
-                        <option value="scalping">⚡ SMC Scalping (15m)</option>
-                        <option value="intraday">📊 Intraday (1H)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label class="label">OpenRouter API Key</label>
-                <input type="password" id="key" class="input-field" placeholder="sk-or-...">
-            </div>
-
-            <button class="analyze-btn" id="btn" onclick="analyze()">ANALYZE STRUCTURE</button>
-
-            <div class="loading" id="loader">
-                <div class="spinner"></div>
-                <div style="font-size:0.8rem; color:#ffd700;">Applying Volatility Filter...</div>
-            </div>
-
-            <div class="result-box" id="result">
-                <div class="signal-header">
-                    <div>
-                        <div style="font-size:0.7rem; color:#666; font-weight:700;">BIAS</div>
-                        <div class="bias" id="resBias">--</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="type-badge" id="resType">--</div>
-                        <div style="font-size:0.7rem; color:#666; margin-top:4px;">Conf: <span id="resConf">--</span></div>
+            <div class="controls-col">
+                <div class="card">
+                    <div class="card-header">1. CHART UPLOAD</div>
+                    <div class="card-body">
+                        <div class="drop-zone" id="dropZone">
+                            <div id="dropText">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
+                                <div>Click or Paste Chart</div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">Prefer 15m or 1H timeframe</div>
+                            </div>
+                            <img id="preview" class="preview-img">
+                        </div>
+                        <button onclick="clearImg()" id="clearBtn" style="width:100%; margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer; display:none;">Remove Image</button>
                     </div>
                 </div>
 
-                <div class="levels-grid">
-                    <div class="level-card entry">
-                        <div class="level-title">ENTRY</div>
-                        <div class="level-price" id="resEntry">--</div>
-                    </div>
-                    <div class="level-card sl">
-                        <div class="level-title">STOP LOSS</div>
-                        <div class="level-price" id="resSL">--</div>
-                        <div class="pips-diff" id="slDist">--</div>
-                    </div>
-                    <div class="level-card tp">
-                        <div class="level-title">TAKE PROFIT</div>
-                        <div class="level-price" id="resTP">--</div>
-                        <div class="pips-diff" id="tpDist">--</div>
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">2. CONFIGURATION</div>
+                    <div class="card-body">
+                         <div class="input-group">
+                            <label class="label">CURRENT PRICE (Required)</label>
+                            <input type="number" id="price" class="input" placeholder="e.g. 2652.50" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label class="label">STRATEGY MODE</label>
+                            <select id="strategy" class="input">
+                                <option value="intraday">🛡️ Safe Intraday ($2-$5 Risk)</option>
+                                <option value="swing">🌊 Swing Setup ($5+ Risk)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label class="label">AI MODEL ID</label>
+                            <input type="text" id="model" class="input" value="amazon/nova-lite-v1" placeholder="Paste Model ID">
+                        </div>
+                        <div class="input-group">
+                            <label class="label">API KEY (OpenRouter)</label>
+                            <input type="password" id="key" class="input" placeholder="sk-or-...">
+                        </div>
+                        <button class="btn" onclick="runAnalysis()">GENERATE SIGNAL</button>
                     </div>
                 </div>
+            </div>
 
-                <div class="reason-text" id="resReason">--</div>
+            <div class="results-col">
+                <div id="placeholder" style="height: 100%; display: flex; align-items: center; justify-content: center; border: 2px dashed #334155; border-radius: 12px; color: #64748b;">
+                    Waiting for analysis...
+                </div>
+
+                <div id="result" class="result-container">
+                    
+                    <div class="signal-banner" id="banner">
+                        <div>
+                            <div class="signal-title" id="resBias">--</div>
+                            <div style="font-size: 0.85rem; opacity: 0.8;">Action Signal</div>
+                        </div>
+                        <div class="conf-wrapper">
+                            <div style="text-align: right;">
+                                <div class="conf-text" id="resConf">0%</div>
+                                <div style="font-size: 0.7rem; color: #94a3b8;">Confidence</div>
+                            </div>
+                            <div class="conf-bar-bg"><div class="conf-bar-fill" id="confFill"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="visual-bar-container">
+                        <div class="visual-bar-title">
+                            <span>PRICE LEVELS VISUALIZATION</span>
+                            <span id="riskRatio">R:R --</span>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="flex:1; text-align: left; color: #ef4444; font-size: 0.75rem;">STOP LOSS</div>
+                            <div style="width: 10px;"></div>
+                            <div style="flex:1; text-align: center; color: #fff; font-size: 0.75rem;">ENTRY</div>
+                            <div style="width: 10px;"></div>
+                            <div style="flex:1; text-align: right; color: #10b981; font-size: 0.75rem;">TARGET</div>
+                        </div>
+
+                        <div class="visual-bar">
+                            <div class="vb-sl"></div>
+                            <div class="vb-entry"></div>
+                            <div class="vb-tp"></div>
+                        </div>
+
+                        <div class="visual-labels">
+                            <div class="vl-sl" id="resSL">--</div>
+                            <div class="vl-entry" id="resEntry">--</div>
+                            <div class="vl-tp" id="resTP">--</div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">STOP LOSS DISTANCE</div>
+                            <div class="metric-val" id="slDist">--</div>
+                            <div class="metric-sub">Minimum $2.00 Safety</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">TAKE PROFIT DISTANCE</div>
+                            <div class="metric-val" id="tpDist">--</div>
+                            <div class="metric-sub">Target Reward</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">AI ANALYSIS & REASONING</div>
+                        <div class="card-body">
+                            <div class="reason-box" id="resReason">--</div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
         </div>
     </div>
-</div>
 
 <script>
-    // --- MARKET HOURS ---
-    function checkMarket() {
-        const d = new Date();
-        const day = d.getUTCDay(), h = d.getUTCHours();
-        const closed = (day===6) || (day===0 && h<22) || (day===5 && h>=22);
-        const el = document.getElementById('statusBadge');
-        const txt = document.getElementById('statusText');
-        
-        if(closed) {
-            el.className = 'status-badge status-closed';
-            txt.innerText = 'MARKET CLOSED';
-        } else {
-            el.className = 'status-badge status-open';
-            txt.innerText = 'MARKET OPEN';
-        }
-    }
-    setInterval(checkMarket, 60000); checkMarket();
-
-    // --- IMAGE HANDLING ---
+    // --- IMAGE LOGIC ---
     let imgBase64 = null;
     const dropZone = document.getElementById('dropZone');
-    const fileIn = document.createElement('input'); fileIn.type='file'; fileIn.accept='image/*';
+    const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/*';
     
     dropZone.onclick = () => { if(!imgBase64) fileIn.click(); };
     fileIn.onchange = e => loadFile(e.target.files[0]);
     document.onpaste = e => { if(e.clipboardData.items[0].type.includes('image')) loadFile(e.clipboardData.items[0].getAsFile()); };
-    
+
     function loadFile(file) {
         const r = new FileReader();
         r.onload = e => {
             imgBase64 = e.target.result;
             document.getElementById('preview').src = imgBase64;
             document.getElementById('preview').classList.add('show');
-            document.getElementById('dropText').classList.add('hide');
-            document.getElementById('clearBtn').style.display = 'inline-block';
+            document.getElementById('dropText').style.display = 'none';
+            document.getElementById('clearBtn').style.display = 'block';
         };
         r.readAsDataURL(file);
     }
 
-    function clearImage() {
+    function clearImg() {
         imgBase64 = null;
         document.getElementById('preview').classList.remove('show');
-        document.getElementById('dropText').classList.remove('hide');
+        document.getElementById('dropText').style.display = 'block';
         document.getElementById('clearBtn').style.display = 'none';
-        document.getElementById('result').classList.remove('show');
     }
 
-    // --- ANALYSIS ENGINE ---
+    // --- MAIN ANALYSIS ---
     const savedKey = localStorage.getItem('or_key');
     if(savedKey) document.getElementById('key').value = savedKey;
 
-    async function analyze() {
+    async function runAnalysis() {
         const key = document.getElementById('key').value.trim();
-        const model = document.getElementById('modelId').value.trim();
+        const model = document.getElementById('model').value.trim();
         const price = document.getElementById('price').value;
-        const strategy = document.getElementById('strategy').value;
+        const mode = document.getElementById('strategy').value;
 
-        if(!key || !model || !imgBase64) return alert("⚠️ Missing Key, Model ID, or Chart Image");
+        if(!key || !imgBase64 || !price) return alert("⚠️ Please provide API Key, Chart Image, and Current Price.");
 
         localStorage.setItem('or_key', key);
+        document.getElementById('loader').style.display = 'flex';
         
-        // UI LOADING STATE
-        document.getElementById('btn').disabled = true;
-        document.getElementById('loader').style.display = 'block';
-        document.getElementById('result').classList.remove('show');
-
-        // FORCE AI TO USE WIDER LEVELS (VOLATILITY GUARD)
-        // We tell the AI: "A Gold Scalp SL must be at least $2.00 away."
+        // --- THE "SAFE" PROMPT ---
+        // Forces wider stops ($2.50+) to match your example
         const systemPrompt = `
-        You are an elite Institutional Gold Trader.
+        You are a Professional Gold (XAU/USD) Analyst.
         
         INPUTS:
-        - Current Market Price: ${price ? price : "Read from Chart Axis"}
-        - Strategy: ${strategy.toUpperCase()}
+        - Current Price: ${price}
+        - Mode: ${mode.toUpperCase()}
         
-        CRITICAL RULES FOR GOLD (XAU/USD):
-        1. SPREAD PROTECTION: Gold has spread. 
-           - STOP LOSS must be AT LEAST $2.00 (20 pips) away from Entry.
-           - TAKE PROFIT must be AT LEAST $3.00 (30 pips) away from Entry.
-           - DO NOT provide tight ranges like $0.30 or $0.50. They are impossible to trade.
+        MANDATORY RISK RULES (DO NOT FAIL THESE):
+        1. **NO SCALPING NOISE:** Stop Loss MUST be at least $2.50 away from entry. (e.g. if Entry 2650, SL must be <2647.5 or >2652.5).
+        2. **NO HUGE SWINGS:** Stop Loss MAX $6.00 away (to protect small account).
+        3. **TARGET:** Take Profit must be > $4.00 away.
+        4. **FORMAT:** Return strict JSON only.
         
-        2. LOGIC:
-           - Identify Trend & Key Levels (Order Blocks/FVG).
-           - IF Price is >$2.00 away from key level -> SIGNAL: LIMIT.
-           - IF Price is <$2.00 from key level -> SIGNAL: MARKET.
-           
-        3. OUTPUT JSON:
+        OUTPUT JSON:
         {
-            "bias": "BUY" | "SELL" | "WAIT",
-            "type": "MARKET" | "LIMIT" | "WAITING",
-            "confidence": 0-100,
-            "entry": number,
+            "bias": "BUY" or "SELL",
+            "confidence": 85,
+            "entry": ${price},
             "sl": number,
             "tp": number,
-            "reason": "Technical reason using SMC concepts."
+            "reason": "Detailed technical analysis..."
         }
         `;
 
@@ -288,43 +312,51 @@
                 })
             });
 
-            if(!resp.ok) throw new Error("API Error: " + resp.status);
-            
             const data = await resp.json();
             const content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
             const res = JSON.parse(content);
 
-            // RENDER RESULTS
-            const biasEl = document.getElementById('resBias');
-            biasEl.innerText = res.bias;
-            biasEl.className = 'bias ' + res.bias;
-
-            document.getElementById('resType').innerText = res.type;
-            document.getElementById('resConf').innerText = res.confidence + '%';
-            document.getElementById('resEntry').innerText = res.entry || price;
-            document.getElementById('resSL').innerText = res.sl || '--';
-            document.getElementById('resTP').innerText = res.tp || '--';
-            document.getElementById('resReason').innerText = res.reason;
-
-            // Show Pips Distance
-            if(res.entry && res.sl) {
-                const diff = Math.abs(res.entry - res.sl).toFixed(2);
-                document.getElementById('slDist').innerText = diff + " USD range";
-                document.getElementById('slDist').style.color = diff < 1.5 ? 'red' : '#666'; // Warn if too tight
-            }
-             if(res.entry && res.tp) {
-                const diff = Math.abs(res.entry - res.tp).toFixed(2);
-                document.getElementById('tpDist').innerText = diff + " USD range";
-            }
-
-            document.getElementById('result').classList.add('show');
+            renderResults(res);
 
         } catch (e) {
-            alert("❌ Analysis Failed: " + e.message);
+            alert("Error: " + e.message);
         }
-
-        document.getElementById('btn').disabled = false;
+        
         document.getElementById('loader').style.display = 'none';
+    }
+
+    function renderResults(res) {
+        document.getElementById('placeholder').style.display = 'none';
+        document.getElementById('result').classList.add('show');
+
+        // Banner
+        const banner = document.getElementById('banner');
+        banner.className = 'signal-banner ' + res.bias;
+        document.getElementById('resBias').innerText = res.bias + " SIGNAL";
+        
+        // Confidence
+        document.getElementById('resConf').innerText = res.confidence + '%';
+        document.getElementById('confFill').style.width = res.confidence + '%';
+
+        // Levels
+        document.getElementById('resEntry').innerText = res.entry;
+        document.getElementById('resSL').innerText = res.sl;
+        document.getElementById('resTP').innerText = res.tp;
+
+        // Distances & RR
+        const slDist = Math.abs(res.entry - res.sl).toFixed(2);
+        const tpDist = Math.abs(res.entry - res.tp).toFixed(2);
+        const rr = (tpDist / slDist).toFixed(2);
+
+        document.getElementById('slDist').innerText = '$' + slDist;
+        document.getElementById('tpDist').innerText = '$' + tpDist;
+        document.getElementById('riskRatio').innerText = `R:R 1:${rr}`;
+
+        // Color Logic for Distances
+        document.getElementById('slDist').style.color = slDist < 2.0 ? '#ef4444' : '#e2e8f0'; // Red if too tight
+
+        // Reasoning
+        document.getElementById('resReason').innerText = res.reason;
     }
 </script>
 
