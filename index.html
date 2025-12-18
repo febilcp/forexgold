@@ -3,362 +3,1375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Pro Dashboard (v11.0)</title>
+    <title>XAU/USD AI Chart Vision Analysis</title>
     <style>
-        /* ================= PROFESSIONAL DASHBOARD THEME ================= */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 20px; }
-        
-        .container { max-width: 1200px; margin: 0 auto; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #1e293b; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .logo span { color: #3b82f6; } /* Blue accent */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a12;
+            min-height: 100vh;
+            color: #fff;
+        }
 
-        /* MAIN LAYOUT */
-        .grid-layout { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
-        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 15px;
+        }
 
-        /* CARDS */
-        .card { background: #1e293b; border-radius: 12px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .card-header { padding: 15px 20px; background: #253045; border-bottom: 1px solid #334155; font-weight: 600; font-size: 0.9rem; color: #94a3b8; display: flex; justify-content: space-between; }
-        .card-body { padding: 20px; }
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
 
-        /* UPLOAD ZONE */
-        .drop-zone { border: 2px dashed #475569; border-radius: 8px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.01); min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .drop-zone:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
-        .preview-img { max-width: 100%; max-height: 250px; border-radius: 6px; display: none; }
-        .preview-img.show { display: block; }
+        .header h1 {
+            font-size: 1.4rem;
+            color: #ffd700;
+        }
 
-        /* INPUTS */
-        .input-group { margin-bottom: 15px; }
-        .label { display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
-        .input { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 12px; border-radius: 6px; outline: none; transition: 0.2s; font-size: 0.9rem; }
-        .input:focus { border-color: #3b82f6; }
-        
-        .btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background: #2563eb; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        /* === RESULT DASHBOARD (Mimicking Chart Analyst) === */
-        .result-container { display: none; }
-        .result-container.show { display: block; }
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
 
-        /* Signal Banner */
-        .signal-banner { padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
-        .signal-banner.BUY { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
-        .signal-banner.SELL { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
-        .signal-title { font-size: 1.4rem; font-weight: 800; }
-        .BUY .signal-title { color: #34d399; }
-        .SELL .signal-title { color: #f87171; }
-        
-        /* Confidence Bar */
-        .conf-wrapper { display: flex; align-items: center; gap: 10px; }
-        .conf-bar-bg { width: 100px; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
-        .conf-bar-fill { height: 100%; background: #fbbf24; width: 0%; transition: 1s; }
-        .conf-text { font-weight: 700; color: #fbbf24; }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+        }
 
-        /* VISUAL BAR (The Key Feature) */
-        .visual-bar-container { background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
-        .visual-bar-title { font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px; display: flex; justify-content: space-between; }
-        .visual-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
-        .vb-sl { background: #ef4444; flex: 1; margin-right: 2px; border-radius: 2px; }
-        .vb-entry { width: 4px; background: #fff; z-index: 2; }
-        .vb-tp { background: #10b981; flex: 2; margin-left: 2px; border-radius: 2px; }
-        
-        .visual-labels { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; }
-        .vl-sl { color: #ef4444; }
-        .vl-entry { color: #fff; }
-        .vl-tp { color: #10b981; }
+        /* Sessions */
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-        /* METRICS GRID */
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .metric-card { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
-        .metric-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 5px; }
-        .metric-val { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
-        .metric-sub { font-size: 0.7rem; color: #64748b; margin-top: 3px; }
+        .session-card {
+            background: linear-gradient(145deg, #151520, #1a1a28);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
 
-        /* REASONING */
-        .reason-box { background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; }
+        .session-card.active {
+            border-color: rgba(0, 255, 136, 0.4);
+        }
 
-        /* LOADING */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-        .loader { width: 40px; height: 40px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .session-card.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .session-icon { font-size: 1.2rem; }
+        .session-name { font-size: 0.8rem; font-weight: 600; margin: 4px 0; }
+        .session-card:nth-child(1) .session-name { color: #ff6b9d; }
+        .session-card:nth-child(2) .session-name { color: #4a9eff; }
+        .session-card:nth-child(3) .session-name { color: #ffd700; }
+
+        .session-status {
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .session-status.active { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+        .session-status.inactive { background: rgba(255, 255, 255, 0.1); color: #666; }
+
+        .session-timer {
+            font-size: 0.85rem;
+            font-weight: bold;
+            font-family: monospace;
+            margin-top: 4px;
+        }
+        .session-card.active .session-timer { color: #00ff88; }
+        .session-card.inactive .session-timer { color: #ffd700; }
+        .timer-label { font-size: 0.55rem; color: #555; }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #12121a;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 20px;
+        }
+
+        .upload-title {
+            color: #ffd700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Screenshot Guide */
+        .screenshot-guide {
+            background: linear-gradient(145deg, rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.05));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .guide-title {
+            color: #a78bfa;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .guide-toggle {
+            color: #a78bfa;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .guide-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .guide-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .guide-content.show {
+            display: block;
+        }
+
+        .guide-section {
+            margin-bottom: 15px;
+        }
+
+        .guide-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .guide-section-title {
+            color: #00ff88;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .guide-list {
+            list-style: none;
+        }
+
+        .guide-list li {
+            color: #ccc;
+            font-size: 0.75rem;
+            padding: 4px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .guide-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .guide-list li.good::before {
+            content: '✓';
+            color: #00ff88;
+        }
+
+        .guide-list li.bad::before {
+            content: '✗';
+            color: #ff4757;
+        }
+
+        /* Timeframe Recommendation */
+        .tf-recommendation {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .tf-rec-title {
+            color: #ffd700;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+        }
+
+        .tf-rec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tf-rec-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .tf-rec-strategy {
+            font-size: 0.65rem;
+            color: #888;
+        }
+
+        .tf-rec-value {
+            font-size: 0.8rem;
+            color: #00ff88;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(255, 215, 0, 0.4);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 215, 0, 0.02);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .drop-zone.drag-over {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .drop-zone.has-image { padding: 10px; }
+        .drop-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .drop-text { color: #888; font-size: 0.9rem; margin-bottom: 8px; }
+        .drop-subtext { color: #555; font-size: 0.7rem; }
+        .file-input { display: none; }
+
+        /* Preview */
+        .preview-container { width: 100%; display: none; }
+        .preview-container.show { display: block; }
+
+        .preview-image {
+            width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .preview-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .preview-btn.remove {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        /* Paste Info */
+        .paste-info {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .paste-info-text { color: #00ff88; font-size: 0.75rem; }
+
+        .paste-shortcut {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #fff;
+        }
+
+        /* AI Section */
+        .ai-section {
+            background: #12121a;
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.1));
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .ai-header h2 {
+            color: #a78bfa;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Candle Count Input */
+        .candle-input-section {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .candle-input-title {
+            color: #ffd700;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .candle-input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .candle-input-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .candle-input-item label {
+            font-size: 0.65rem;
+            color: #888;
+        }
+
+        .candle-input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .candle-count-input {
+            width: 50px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .candle-type {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .candle-type.green {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .candle-type.red {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .candle-type.selected {
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Market Condition */
+        .market-condition {
+            margin-top: 10px;
+        }
+
+        .market-condition label {
+            display: block;
+            font-size: 0.65rem;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .market-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .market-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #888;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .market-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .market-btn.selected {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .market-btn.selected.bearish {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: #ff4757;
+            color: #ff4757;
+        }
+
+        .market-btn.selected.neutral {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        /* Settings */
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 0.65rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .setting-select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.8rem;
+        }
+
+        /* API Input */
+        .api-section { margin-bottom: 12px; }
+
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .api-link {
+            color: #667eea;
+            font-size: 0.7rem;
+            text-decoration: none;
+        }
+
+        .api-note {
+            color: #00ff88;
+            font-size: 0.65rem;
+            margin-top: 5px;
+        }
+
+        /* Button */
+        .ai-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .ai-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* AI Content */
+        .ai-content {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 450px;
+        }
+
+        .ai-placeholder {
+            text-align: center;
+            padding: 30px 15px;
+            color: #555;
+        }
+
+        .ai-placeholder-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .ai-placeholder-text { font-size: 0.85rem; color: #666; line-height: 1.6; }
+
+        /* Result */
+        .ai-result { display: none; }
+        .ai-result.show { display: block; }
+
+        .signal-box {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .signal-badges {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+
+        .badge.gold { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        .badge.purple { background: rgba(102, 126, 234, 0.2); color: #a78bfa; }
+        .badge.green { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+
+        .signal-bias {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .signal-bias.strong-buy { color: #00ff88; }
+        .signal-bias.buy { color: #7dffb3; }
+        .signal-bias.neutral-buy { color: #b8ffda; }
+        .signal-bias.neutral { color: #ffd700; }
+        .signal-bias.neutral-sell { color: #ffb3b3; }
+        .signal-bias.sell { color: #ff7a7a; }
+        .signal-bias.strong-sell { color: #ff4757; }
+
+        .confidence-row { margin-top: 8px; }
+        .confidence-label { font-size: 0.7rem; color: #888; margin-bottom: 4px; }
+
+        .confidence-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .confidence-fill { height: 100%; border-radius: 3px; }
+        .confidence-fill.high { background: linear-gradient(90deg, #00ff88, #00cc6a); }
+        .confidence-fill.medium { background: linear-gradient(90deg, #ffd700, #ffaa00); }
+        .confidence-fill.low { background: linear-gradient(90deg, #ff4757, #ff6b7a); }
+
+        /* Levels */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .level-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .level-card.entry { border: 1px solid rgba(102, 126, 234, 0.4); }
+        .level-card.sl { border: 1px solid rgba(255, 71, 87, 0.4); }
+        .level-card.tp { border: 1px solid rgba(0, 255, 136, 0.4); }
+
+        .level-label { font-size: 0.6rem; color: #666; margin-bottom: 4px; }
+        .level-value { font-size: 1.1rem; font-weight: bold; }
+
+        .level-card.entry .level-value { color: #a78bfa; }
+        .level-card.sl .level-value { color: #ff4757; }
+        .level-card.tp .level-value { color: #00ff88; }
+
+        .level-pips { font-size: 0.55rem; color: #555; margin-top: 2px; }
+
+        /* Analysis */
+        .analysis-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+        }
+
+        .analysis-title { color: #a78bfa; font-size: 0.75rem; margin-bottom: 8px; font-weight: 600; }
+        .analysis-text { color: #ccc; font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; }
+
+        .timestamp { text-align: center; font-size: 0.6rem; color: #444; margin-top: 12px; }
+
+        /* Error */
+        .error-box {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-box.show { display: block; }
+        .error-box p { color: #ff6b7a; font-size: 0.8rem; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sessions-grid { grid-template-columns: 1fr; }
+            .candle-input-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="loading-overlay" id="loader">
-        <div class="loader"></div>
-        <div style="color: #3b82f6; font-weight: 600;">Analyzing Chart Structure...</div>
-    </div>
-
     <div class="container">
+
+        <!-- Header -->
         <header class="header">
-            <div class="logo"><span>⚡</span> XAU/USD PRO DASHBOARD</div>
-            <div style="font-size: 0.8rem; color: #64748b;">v11.0 Safe-Mode</div>
+            <h1>🥇 XAU/USD AI Vision</h1>
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                <span style="color: #00ff88; font-size: 0.85rem;">LIVE</span>
+            </div>
         </header>
 
-        <div class="grid-layout">
-            
-            <div class="controls-col">
-                <div class="card">
-                    <div class="card-header">1. CHART UPLOAD</div>
-                    <div class="card-body">
-                        <div class="drop-zone" id="dropZone">
-                            <div id="dropText">
-                                <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
-                                <div>Click or Paste Chart</div>
-                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">Prefer 15m or 1H timeframe</div>
-                            </div>
-                            <img id="preview" class="preview-img">
+        <!-- Sessions -->
+        <div class="sessions-grid">
+            <div class="session-card" id="tokyoCard">
+                <div class="session-icon">🗼</div>
+                <div class="session-name">Tokyo</div>
+                <div class="session-status" id="tokyoStatus">--</div>
+                <div class="session-timer" id="tokyoTimer">--</div>
+                <div class="timer-label" id="tokyoLabel">--</div>
+            </div>
+            <div class="session-card" id="londonCard">
+                <div class="session-icon">🏰</div>
+                <div class="session-name">London</div>
+                <div class="session-status" id="londonStatus">--</div>
+                <div class="session-timer" id="londonTimer">--</div>
+                <div class="timer-label" id="londonLabel">--</div>
+            </div>
+            <div class="session-card" id="newyorkCard">
+                <div class="session-icon">🗽</div>
+                <div class="session-name">New York</div>
+                <div class="session-status" id="newyorkStatus">--</div>
+                <div class="session-timer" id="newyorkTimer">--</div>
+                <div class="timer-label" id="newyorkLabel">--</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2 class="upload-title">📸 Upload Chart Screenshot</h2>
+                
+                <!-- Screenshot Guide -->
+                <div class="screenshot-guide">
+                    <div class="guide-header" onclick="toggleGuide()">
+                        <span class="guide-title">📋 When to Take Screenshot?</span>
+                        <span class="guide-toggle" id="guideToggle">▼</span>
+                    </div>
+                    <div class="guide-content" id="guideContent">
+                        <div class="guide-section">
+                            <div class="guide-section-title">✅ Best Time to Screenshot</div>
+                            <ul class="guide-list">
+                                <li class="good">After candle CLOSES (complete data)</li>
+                                <li class="good">At key support/resistance level</li>
+                                <li class="good">After 2-3 confirmation candles</li>
+                                <li class="good">When clear trend is visible</li>
+                                <li class="good">After BOS or CHoCH forms</li>
+                            </ul>
                         </div>
-                        <button onclick="clearImg()" id="clearBtn" style="width:100%; margin-top:10px; background:none; border:1px solid #ef4444; color:#ef4444; padding:8px; border-radius:6px; cursor:pointer; display:none;">Remove Image</button>
+                        <div class="guide-section">
+                            <div class="guide-section-title" style="color: #ff4757;">❌ Avoid Screenshot When</div>
+                            <ul class="guide-list">
+                                <li class="bad">Candle is still forming</li>
+                                <li class="bad">During high-impact news</li>
+                                <li class="bad">In choppy/ranging market</li>
+                                <li class="bad">Random time without context</li>
+                            </ul>
+                        </div>
+                        <div class="tf-recommendation">
+                            <div class="tf-rec-title">🎯 Recommended Timeframe</div>
+                            <div class="tf-rec-grid">
+                                <div class="tf-rec-item">
+                                    <div class="tf-rec-strategy">⚡ Scalping</div>
+                                    <div class="tf-rec-value">1M - 5M</div>
+                                </div>
+                                <div class="tf-rec-item">
+                                    <div class="tf-rec-strategy">📊 Intraday</div>
+                                    <div class="tf-rec-value">15M - 30M</div>
+                                </div>
+                                <div class="tf-rec-item">
+                                    <div class="tf-rec-strategy">📈 Swing</div>
+                                    <div class="tf-rec-value">1H - 4H</div>
+                                </div>
+                                <div class="tf-rec-item">
+                                    <div class="tf-rec-strategy">🎯 SMC/ICT</div>
+                                    <div class="tf-rec-value">15M + 1H</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 20px;">
-                    <div class="card-header">2. CONFIGURATION</div>
-                    <div class="card-body">
-                         <div class="input-group">
-                            <label class="label">CURRENT PRICE (Required)</label>
-                            <input type="number" id="price" class="input" placeholder="e.g. 2652.50" step="0.01">
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="dropZone">
+                    <div id="dropContent">
+                        <div class="drop-icon">📊</div>
+                        <div class="drop-text">Drop chart or click to upload</div>
+                        <div class="drop-subtext">PNG, JPG, WebP</div>
+                    </div>
+                    <div class="preview-container" id="previewContainer">
+                        <img class="preview-image" id="previewImage" alt="Chart">
+                        <div class="preview-actions">
+                            <button class="preview-btn remove" onclick="removeImage()">🗑️ Remove</button>
                         </div>
-                        <div class="input-group">
-                            <label class="label">STRATEGY MODE</label>
-                            <select id="strategy" class="input">
-                                <option value="intraday">🛡️ Safe Intraday ($2-$5 Risk)</option>
-                                <option value="swing">🌊 Swing Setup ($5+ Risk)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label class="label">AI MODEL ID</label>
-                            <input type="text" id="model" class="input" value="amazon/nova-lite-v1" placeholder="Paste Model ID">
-                        </div>
-                        <div class="input-group">
-                            <label class="label">API KEY (OpenRouter)</label>
-                            <input type="password" id="key" class="input" placeholder="sk-or-...">
-                        </div>
-                        <button class="btn" onclick="runAnalysis()">GENERATE SIGNAL</button>
+                    </div>
+                </div>
+                <input type="file" class="file-input" id="fileInput" accept="image/*">
+
+                <div class="paste-info">
+                    <div class="paste-info-text">
+                        💡 Press <span class="paste-shortcut">Ctrl+V</span> to paste screenshot!
                     </div>
                 </div>
             </div>
 
-            <div class="results-col">
-                <div id="placeholder" style="height: 100%; display: flex; align-items: center; justify-content: center; border: 2px dashed #334155; border-radius: 12px; color: #64748b;">
-                    Waiting for analysis...
+            <!-- AI Section -->
+            <div class="ai-section">
+                <div class="ai-header">
+                    <h2>🤖 AI Vision Analysis</h2>
+
+                    <!-- Candle Count & Market Info -->
+                    <div class="candle-input-section">
+                        <div class="candle-input-title">📊 Tell AI What You See (Optional)</div>
+                        
+                        <div class="candle-input-grid">
+                            <div class="candle-input-item">
+                                <label>Last Candles Before Screenshot</label>
+                                <div class="candle-input-row">
+                                    <input type="number" class="candle-count-input" id="candleCount" value="3" min="1" max="20">
+                                    <button class="candle-type green" id="greenBtn" onclick="selectCandleType('green')">🟢 Green</button>
+                                    <button class="candle-type red" id="redBtn" onclick="selectCandleType('red')">🔴 Red</button>
+                                </div>
+                            </div>
+                            <div class="candle-input-item">
+                                <label>Screenshot Taken At</label>
+                                <select class="setting-select" id="screenshotLocation">
+                                    <option value="candle-close">After Candle Close ✓</option>
+                                    <option value="support">At Support Level</option>
+                                    <option value="resistance">At Resistance Level</option>
+                                    <option value="order-block">At Order Block</option>
+                                    <option value="fvg">At FVG/Imbalance</option>
+                                    <option value="breakout">After Breakout</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="market-condition">
+                            <label>Current Trend (What You See)</label>
+                            <div class="market-buttons">
+                                <button class="market-btn" data-value="strong-bullish" onclick="selectMarket(this)">📈 Strong Bull</button>
+                                <button class="market-btn" data-value="bullish" onclick="selectMarket(this)">↗️ Bullish</button>
+                                <button class="market-btn" data-value="ranging" onclick="selectMarket(this)">↔️ Ranging</button>
+                                <button class="market-btn" data-value="bearish" onclick="selectMarket(this)">↘️ Bearish</button>
+                                <button class="market-btn" data-value="strong-bearish" onclick="selectMarket(this)">📉 Strong Bear</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="settings-row">
+                        <div class="setting-item">
+                            <label>Strategy</label>
+                            <select class="setting-select" id="strategySelect">
+                                <option value="scalping">⚡ Scalping</option>
+                                <option value="intraday" selected>📊 Intraday</option>
+                                <option value="swing">📈 Swing</option>
+                                <option value="smc">🎯 SMC/ICT</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Timeframe</label>
+                            <select class="setting-select" id="timeframeSelect">
+                                <option value="1m">1M</option>
+                                <option value="5m">5M</option>
+                                <option value="15m" selected>15M</option>
+                                <option value="30m">30M</option>
+                                <option value="1h">1H</option>
+                                <option value="4h">4H</option>
+                                <option value="1d">1D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- API -->
+                    <div class="api-section">
+                        <input type="password" class="api-input" id="apiInput" placeholder="🔑 OpenRouter API Key">
+                        <a href="https://openrouter.ai/keys" target="_blank" class="api-link">Get FREE API Key →</a>
+                    </div>
+
+                    <button class="ai-button" id="analyzeBtn" onclick="analyzeChart()">
+                        🔍 Analyze Chart
+                    </button>
+
+                    <div class="error-box" id="errorBox">
+                        <p id="errorText"></p>
+                    </div>
                 </div>
 
-                <div id="result" class="result-container">
-                    
-                    <div class="signal-banner" id="banner">
-                        <div>
-                            <div class="signal-title" id="resBias">--</div>
-                            <div style="font-size: 0.85rem; opacity: 0.8;">Action Signal</div>
+                <div class="ai-content">
+                    <div class="ai-placeholder" id="placeholder">
+                        <div class="ai-placeholder-icon">👁️</div>
+                        <div class="ai-placeholder-text">
+                            1. Screenshot after candle closes<br>
+                            2. Upload or Ctrl+V paste<br>
+                            3. Select what you see<br>
+                            4. Click Analyze!
                         </div>
-                        <div class="conf-wrapper">
-                            <div style="text-align: right;">
-                                <div class="conf-text" id="resConf">0%</div>
-                                <div style="font-size: 0.7rem; color: #94a3b8;">Confidence</div>
+                    </div>
+
+                    <div class="ai-result" id="result">
+                        <div class="signal-box">
+                            <div class="signal-badges">
+                                <span class="badge gold">XAUUSD</span>
+                                <span class="badge purple" id="badgeStrategy">INTRADAY</span>
+                                <span class="badge green" id="badgeTF">15M</span>
                             </div>
-                            <div class="conf-bar-bg"><div class="conf-bar-fill" id="confFill"></div></div>
+                            <div class="signal-bias" id="resultBias">--</div>
+                            <div class="confidence-row">
+                                <div class="confidence-label">Confidence: <span id="confidenceValue">--</span></div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="levels-grid">
+                            <div class="level-card entry">
+                                <div class="level-label">ENTRY</div>
+                                <div class="level-value" id="resultEntry">--</div>
+                                <div class="level-pips" id="entryPips">--</div>
+                            </div>
+                            <div class="level-card sl">
+                                <div class="level-label">STOP LOSS</div>
+                                <div class="level-value" id="resultSL">--</div>
+                                <div class="level-pips" id="slPips">--</div>
+                            </div>
+                            <div class="level-card tp">
+                                <div class="level-label">TAKE PROFIT</div>
+                                <div class="level-value" id="resultTP">--</div>
+                                <div class="level-pips" id="tpPips">--</div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-box">
+                            <div class="analysis-title">📝 Chart Analysis</div>
+                            <div class="analysis-text" id="resultAnalysis">--</div>
+                        </div>
+
+                        <div class="timestamp" id="resultTime">--</div>
                     </div>
-
-                    <div class="visual-bar-container">
-                        <div class="visual-bar-title">
-                            <span>PRICE LEVELS VISUALIZATION</span>
-                            <span id="riskRatio">R:R --</span>
-                        </div>
-                        
-                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <div style="flex:1; text-align: left; color: #ef4444; font-size: 0.75rem;">STOP LOSS</div>
-                            <div style="width: 10px;"></div>
-                            <div style="flex:1; text-align: center; color: #fff; font-size: 0.75rem;">ENTRY</div>
-                            <div style="width: 10px;"></div>
-                            <div style="flex:1; text-align: right; color: #10b981; font-size: 0.75rem;">TARGET</div>
-                        </div>
-
-                        <div class="visual-bar">
-                            <div class="vb-sl"></div>
-                            <div class="vb-entry"></div>
-                            <div class="vb-tp"></div>
-                        </div>
-
-                        <div class="visual-labels">
-                            <div class="vl-sl" id="resSL">--</div>
-                            <div class="vl-entry" id="resEntry">--</div>
-                            <div class="vl-tp" id="resTP">--</div>
-                        </div>
-                    </div>
-
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-label">STOP LOSS DISTANCE</div>
-                            <div class="metric-val" id="slDist">--</div>
-                            <div class="metric-sub">Minimum $2.00 Safety</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">TAKE PROFIT DISTANCE</div>
-                            <div class="metric-val" id="tpDist">--</div>
-                            <div class="metric-sub">Target Reward</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">AI ANALYSIS & REASONING</div>
-                        <div class="card-body">
-                            <div class="reason-box" id="resReason">--</div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
         </div>
+
     </div>
 
-<script>
-    // --- IMAGE LOGIC ---
-    let imgBase64 = null;
-    const dropZone = document.getElementById('dropZone');
-    const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/*';
-    
-    dropZone.onclick = () => { if(!imgBase64) fileIn.click(); };
-    fileIn.onchange = e => loadFile(e.target.files[0]);
-    document.onpaste = e => { if(e.clipboardData.items[0].type.includes('image')) loadFile(e.clipboardData.items[0].getAsFile()); };
-
-    function loadFile(file) {
-        const r = new FileReader();
-        r.onload = e => {
-            imgBase64 = e.target.result;
-            document.getElementById('preview').src = imgBase64;
-            document.getElementById('preview').classList.add('show');
-            document.getElementById('dropText').style.display = 'none';
-            document.getElementById('clearBtn').style.display = 'block';
+    <script>
+        // ============================================
+        // SESSIONS
+        // ============================================
+        
+        const sessions = {
+            tokyo: { start: 0, end: 9 },
+            london: { start: 7, end: 16 },
+            newyork: { start: 12, end: 21 }
         };
-        r.readAsDataURL(file);
-    }
 
-    function clearImg() {
-        imgBase64 = null;
-        document.getElementById('preview').classList.remove('show');
-        document.getElementById('dropText').style.display = 'block';
-        document.getElementById('clearBtn').style.display = 'none';
-    }
+        function updateSessions() {
+            const now = new Date();
+            const h = now.getUTCHours();
+            const m = now.getUTCMinutes();
+            const s = now.getUTCSeconds();
 
-    // --- MAIN ANALYSIS ---
-    const savedKey = localStorage.getItem('or_key');
-    if(savedKey) document.getElementById('key').value = savedKey;
+            Object.keys(sessions).forEach(key => {
+                const ses = sessions[key];
+                const card = document.getElementById(key + 'Card');
+                const status = document.getElementById(key + 'Status');
+                const timer = document.getElementById(key + 'Timer');
+                const label = document.getElementById(key + 'Label');
 
-    async function runAnalysis() {
-        const key = document.getElementById('key').value.trim();
-        const model = document.getElementById('model').value.trim();
-        const price = document.getElementById('price').value;
-        const mode = document.getElementById('strategy').value;
+                const active = h >= ses.start && h < ses.end;
+                
+                card.classList.toggle('active', active);
+                status.className = 'session-status ' + (active ? 'active' : 'inactive');
+                status.textContent = active ? '● Active' : '○ Closed';
 
-        if(!key || !imgBase64 || !price) return alert("⚠️ Please provide API Key, Chart Image, and Current Price.");
-
-        localStorage.setItem('or_key', key);
-        document.getElementById('loader').style.display = 'flex';
-        
-        // --- THE "SAFE" PROMPT ---
-        // Forces wider stops ($2.50+) to match your example
-        const systemPrompt = `
-        You are a Professional Gold (XAU/USD) Analyst.
-        
-        INPUTS:
-        - Current Price: ${price}
-        - Mode: ${mode.toUpperCase()}
-        
-        MANDATORY RISK RULES (DO NOT FAIL THESE):
-        1. **NO SCALPING NOISE:** Stop Loss MUST be at least $2.50 away from entry. (e.g. if Entry 2650, SL must be <2647.5 or >2652.5).
-        2. **NO HUGE SWINGS:** Stop Loss MAX $6.00 away (to protect small account).
-        3. **TARGET:** Take Profit must be > $4.00 away.
-        4. **FORMAT:** Return strict JSON only.
-        
-        OUTPUT JSON:
-        {
-            "bias": "BUY" or "SELL",
-            "confidence": 85,
-            "entry": ${price},
-            "sl": number,
-            "tp": number,
-            "reason": "Detailed technical analysis..."
+                if (active) {
+                    timer.textContent = `${ses.end - h - 1}h ${59-m}m ${59-s}s`;
+                    label.textContent = 'Closes in';
+                } else {
+                    let hrs = ses.start - h;
+                    if (hrs < 0) hrs += 24;
+                    timer.textContent = `${hrs}h ${59-m}m ${59-s}s`;
+                    label.textContent = 'Opens in';
+                }
+            });
         }
-        `;
 
-        try {
-            const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
+        setInterval(updateSessions, 1000);
+        updateSessions();
+
+        // ============================================
+        // GUIDE TOGGLE
+        // ============================================
+        
+        function toggleGuide() {
+            const content = document.getElementById('guideContent');
+            const toggle = document.getElementById('guideToggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+        }
+
+        // ============================================
+        // CANDLE TYPE & MARKET SELECTION
+        // ============================================
+        
+        let selectedCandleType = null;
+        let selectedMarket = null;
+
+        function selectCandleType(type) {
+            document.querySelectorAll('.candle-type').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(type + 'Btn').classList.add('selected');
+            selectedCandleType = type;
+        }
+
+        function selectMarket(btn) {
+            document.querySelectorAll('.market-btn').forEach(b => {
+                b.classList.remove('selected', 'bearish', 'neutral');
+            });
+            btn.classList.add('selected');
+            
+            const value = btn.dataset.value;
+            if (value.includes('bear')) btn.classList.add('bearish');
+            else if (value === 'ranging') btn.classList.add('neutral');
+            
+            selectedMarket = value;
+        }
+
+        // ============================================
+        // IMAGE HANDLING
+        // ============================================
+        
+        let uploadedImage = null;
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const dropContent = document.getElementById('dropContent');
+
+        dropZone.addEventListener('click', () => {
+            if (!uploadedImage) fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files?.[0]) handleFile(e.target.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
+        });
+
+        document.addEventListener('paste', (e) => {
+            for (let item of e.clipboardData.items) {
+                if (item.type.includes('image')) {
+                    handleFile(item.getAsFile());
+                    break;
+                }
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please upload an image');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage = e.target.result;
+                previewImage.src = uploadedImage;
+                dropContent.style.display = 'none';
+                previewContainer.classList.add('show');
+                dropZone.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            uploadedImage = null;
+            previewImage.src = '';
+            dropContent.style.display = 'flex';
+            previewContainer.classList.remove('show');
+            dropZone.classList.remove('has-image');
+            fileInput.value = '';
+        }
+
+        // ============================================
+        // LOAD SAVED KEY
+        // ============================================
+        
+        const savedKey = localStorage.getItem('openrouter_vision_key');
+        if (savedKey) document.getElementById('apiInput').value = savedKey;
+
+        // ============================================
+        // VISION MODELS
+        // ============================================
+        
+        const VISION_MODELS = [
+            'qwen/qwen-2-vl-7b-instruct:free',
+            'meta-llama/llama-3.2-11b-vision-instruct:free',
+            'google/gemini-2.0-flash-exp:free'
+        ];
+
+        // ============================================
+        // ANALYZE
+        // ============================================
+        
+        async function analyzeChart() {
+            const apiKey = document.getElementById('apiInput').value.trim();
+            const strategy = document.getElementById('strategySelect').value;
+            const timeframe = document.getElementById('timeframeSelect').value;
+            const candleCount = document.getElementById('candleCount').value;
+            const screenshotLocation = document.getElementById('screenshotLocation').value;
+
+            if (!uploadedImage) {
+                showError('⚠️ Upload a chart screenshot first');
+                return;
+            }
+
+            if (!apiKey) {
+                showError('⚠️ Enter OpenRouter API key');
+                return;
+            }
+
+            localStorage.setItem('openrouter_vision_key', apiKey);
+            hideError();
+
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+
+            let success = false;
+            let lastError = '';
+
+            for (const model of VISION_MODELS) {
+                if (success) break;
+                
+                try {
+                    console.log('Trying:', model);
+                    btn.innerHTML = `<div class="spinner"></div> Analyzing...`;
+                    
+                    const result = await callAPI(apiKey, model, strategy, timeframe, candleCount, screenshotLocation);
+                    displayResult(result, strategy, timeframe);
+                    success = true;
+                } catch (err) {
+                    console.log(`${model} failed:`, err.message);
+                    lastError = err.message;
+                }
+            }
+
+            if (!success) {
+                showError('❌ ' + lastError);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analyze Chart';
+        }
+
+        // ============================================
+        // API CALL
+        // ============================================
+        
+        async function callAPI(apiKey, model, strategy, timeframe, candleCount, screenshotLocation) {
+            const h = new Date().getUTCHours();
+            let session = 'Asian';
+            if (h >= 7 && h < 16) session = 'London';
+            if (h >= 12 && h < 21) session = 'New York';
+
+            const configs = {
+                scalping: { sl: '10-20', tp: '15-30' },
+                intraday: { sl: '20-35', tp: '40-70' },
+                swing: { sl: '40-70', tp: '80-150' },
+                smc: { sl: '20-40', tp: '50-100' }
+            };
+            const cfg = configs[strategy];
+
+            // Build context from user inputs
+            let userContext = '';
+            if (selectedCandleType) {
+                userContext += `\n- Last ${candleCount} candles were ${selectedCandleType.toUpperCase()}`;
+            }
+            if (selectedMarket) {
+                userContext += `\n- User observes: ${selectedMarket.toUpperCase()} trend`;
+            }
+            if (screenshotLocation !== 'candle-close') {
+                userContext += `\n- Screenshot taken at: ${screenshotLocation.replace('-', ' ')}`;
+            }
+
+            const prompt = `You are an expert XAU/USD Gold trading analyst. Analyze this chart image.
+
+CONTEXT:
+- Strategy: ${strategy.toUpperCase()}
+- Timeframe: ${timeframe.toUpperCase()}
+- Session: ${session}
+- SL Range: ${cfg.sl} pips
+- TP Range: ${cfg.tp} pips
+${userContext}
+
+IMPORTANT: If user says trend is BULLISH, bias should lean towards BUY.
+If user says trend is BEARISH, bias should lean towards SELL.
+
+ANALYZE THE CHART:
+1. Read current price
+2. Identify trend from candles
+3. Find support/resistance levels
+4. Check visible indicators (RSI, MACD, EMA, etc.)
+5. Look for order blocks, FVG, patterns
+
+RESPOND IN THIS FORMAT:
+
+BIAS: [Strong Buy / Buy / Neutral / Sell / Strong Sell]
+CONFIDENCE: [50-95]%
+CURRENT_PRICE: [price from chart]
+ENTRY: [entry price]
+STOP_LOSS: [SL price]
+TAKE_PROFIT: [TP price]
+
+ANALYSIS:
+[Explain what you see: trend, levels, indicators, patterns, and WHY you recommend this direction]`;
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
                 headers: {
-                    "Authorization": `Bearer ${key}`,
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": window.location.href
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.href
                 },
                 body: JSON.stringify({
                     model: model,
                     messages: [{
-                        role: "user",
+                        role: 'user',
                         content: [
-                            { type: "text", text: systemPrompt },
-                            { type: "image_url", image_url: { url: imgBase64 } }
+                            { type: 'text', text: prompt },
+                            { type: 'image_url', image_url: { url: uploadedImage } }
                         ]
                     }],
-                    response_format: { type: "json_object" }
+                    max_tokens: 1500,
+                    temperature: 0.2
                 })
             });
 
-            const data = await resp.json();
-            const content = data.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
-            const res = JSON.parse(content);
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error?.message || 'API Error');
+            }
 
-            renderResults(res);
+            const data = await response.json();
+            
+            if (!data.choices?.[0]?.message?.content) {
+                throw new Error('No AI response');
+            }
 
-        } catch (e) {
-            alert("Error: " + e.message);
+            return parseResult(data.choices[0].message.content);
         }
+
+        // ============================================
+        // PARSE & DISPLAY
+        // ============================================
         
-        document.getElementById('loader').style.display = 'none';
-    }
+        function parseResult(text) {
+            console.log('AI:', text);
 
-    function renderResults(res) {
-        document.getElementById('placeholder').style.display = 'none';
-        document.getElementById('result').classList.add('show');
+            const get = (key) => {
+                const match = text.match(new RegExp(`${key}[:\\s]+(.+?)(?:\\n|$)`, 'i'));
+                return match ? match[1].trim() : '';
+            };
 
-        // Banner
-        const banner = document.getElementById('banner');
-        banner.className = 'signal-banner ' + res.bias;
-        document.getElementById('resBias').innerText = res.bias + " SIGNAL";
-        
-        // Confidence
-        document.getElementById('resConf').innerText = res.confidence + '%';
-        document.getElementById('confFill').style.width = res.confidence + '%';
+            const getNum = (key) => parseFloat(get(key).replace(/[^0-9.]/g, '')) || 0;
 
-        // Levels
-        document.getElementById('resEntry').innerText = res.entry;
-        document.getElementById('resSL').innerText = res.sl;
-        document.getElementById('resTP').innerText = res.tp;
+            let analysis = text.includes('ANALYSIS:') ? text.split('ANALYSIS:')[1].trim() : text;
 
-        // Distances & RR
-        const slDist = Math.abs(res.entry - res.sl).toFixed(2);
-        const tpDist = Math.abs(res.entry - res.tp).toFixed(2);
-        const rr = (tpDist / slDist).toFixed(2);
+            return {
+                bias: get('BIAS') || 'Neutral',
+                confidence: parseInt(get('CONFIDENCE')) || 70,
+                currentPrice: getNum('CURRENT_PRICE'),
+                entry: getNum('ENTRY'),
+                sl: getNum('STOP_LOSS'),
+                tp: getNum('TAKE_PROFIT'),
+                analysis: analysis.substring(0, 1000)
+            };
+        }
 
-        document.getElementById('slDist').innerText = '$' + slDist;
-        document.getElementById('tpDist').innerText = '$' + tpDist;
-        document.getElementById('riskRatio').innerText = `R:R 1:${rr}`;
+        function displayResult(data, strategy, timeframe) {
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('result').classList.add('show');
 
-        // Color Logic for Distances
-        document.getElementById('slDist').style.color = slDist < 2.0 ? '#ef4444' : '#e2e8f0'; // Red if too tight
+            document.getElementById('badgeStrategy').textContent = strategy.toUpperCase();
+            document.getElementById('badgeTF').textContent = timeframe.toUpperCase();
 
-        // Reasoning
-        document.getElementById('resReason').innerText = res.reason;
-    }
-</script>
+            const biasEl = document.getElementById('resultBias');
+            biasEl.textContent = data.bias;
+            biasEl.className = 'signal-bias ' + data.bias.toLowerCase().replace(/\s+/g, '-');
+
+            document.getElementById('confidenceValue').textContent = data.confidence + '%';
+            const fill = document.getElementById('confidenceFill');
+            fill.style.width = data.confidence + '%';
+            fill.className = 'confidence-fill ' + 
+                (data.confidence >= 75 ? 'high' : data.confidence >= 50 ? 'medium' : 'low');
+
+            document.getElementById('resultEntry').textContent = data.entry ? '$' + data.entry.toFixed(0) : '--';
+            document.getElementById('resultSL').textContent = data.sl ? '$' + data.sl.toFixed(0) : '--';
+            document.getElementById('resultTP').textContent = data.tp ? '$' + data.tp.toFixed(0) : '--';
+
+            if (data.entry && data.sl) {
+                document.getElementById('slPips').textContent = Math.abs(data.sl - data.entry).toFixed(0) + ' pips';
+            }
+            if (data.entry && data.tp) {
+                document.getElementById('tpPips').textContent = Math.abs(data.tp - data.entry).toFixed(0) + ' pips';
+            }
+
+            document.getElementById('resultAnalysis').textContent = data.analysis;
+            document.getElementById('resultTime').textContent = 'Analyzed: ' + new Date().toLocaleString();
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').textContent = msg;
+            document.getElementById('errorBox').classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.remove('show');
+        }
+    </script>
 
 </body>
-</html>
+    </html>
